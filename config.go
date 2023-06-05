@@ -1,4 +1,4 @@
-// Copyright © 2022 Ory Corp
+// Copyright © 2023 Ory Corp
 // SPDX-License-Identifier: Apache-2.0
 
 package fosite
@@ -299,4 +299,10 @@ type PushedAuthorizeRequestConfigProvider interface {
 	// cannot pass authorize parameters at the 'authorize' endpoint. The 'authorize' endpoint
 	// must contain the PAR request_uri.
 	EnforcePushedAuthorize(ctx context.Context) bool
+}
+
+type RFC8693ConfigProvider interface {
+	GetTokenTypes(ctx context.Context) map[string]RFC8693TokenType
+
+	GetDefaultRequestedTokenType(ctx context.Context) string
 }

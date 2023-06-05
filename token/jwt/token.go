@@ -1,4 +1,4 @@
-// Copyright © 2022 Ory Corp
+// Copyright © 2023 Ory Corp
 // SPDX-License-Identifier: Apache-2.0
 
 package jwt
@@ -109,7 +109,9 @@ func (t *Token) SignedString(k interface{}) (rawToken string, err error) {
 
 func unsignedToken(t *Token) (string, error) {
 	t.Header["alg"] = "none"
-	t.Header[string(JWTHeaderType)] = JWTHeaderTypeValue
+	if _, ok := t.Header[string(JWTHeaderType)]; !ok {
+		t.Header[string(JWTHeaderType)] = JWTHeaderTypeValue
+	}
 	hbytes, err := json.Marshal(&t.Header)
 	if err != nil {
 		return "", errorsx.WithStack(err)
