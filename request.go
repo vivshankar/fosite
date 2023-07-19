@@ -126,6 +126,10 @@ func (a *Request) GrantScope(scope string) {
 	a.GrantedScope = append(a.GrantedScope, scope)
 }
 
+func (a *Request) ReplaceGrantedScopes(scopes Arguments) {
+	a.GrantedScope = scopes
+}
+
 func (a *Request) SetSession(session Session) {
 	a.Session = session
 }

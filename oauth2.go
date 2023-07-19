@@ -245,6 +245,11 @@ type Requester interface {
 	Sanitize(allowedParameters []string) Requester
 }
 
+type RefreshTokenRequester interface {
+	// ReplaceGrantedScopes sets the granted scopes
+	ReplaceGrantedScopes(grantedScopes Arguments)
+}
+
 // AccessRequester is a token endpoint's request context.
 type AccessRequester interface {
 	// GetGrantType returns the requests grant type.

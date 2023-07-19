@@ -81,10 +81,22 @@ func (c *RefreshTokenGrantHandler) HandleTokenEndpointRequest(ctx context.Contex
 	request.SetRequestedScopes(originalRequest.GetRequestedScopes())
 	request.SetRequestedAudience(originalRequest.GetRequestedAudience())
 
-	for _, scope := range originalRequest.GetGrantedScopes() {
-		if !c.Config.GetScopeStrategy(ctx)(request.GetClient().GetScopes(), scope) {
+	// orGrantedScopes are the original scopes granted when issuing the refresh token.
+	// These should be retained in the new refresh token session.
+	// However, the access token session should store the intersection of this and the requested scopes.
+	orGrantedScopes := originalRequest.GetGrantedScopes()
+	clientAllowedScopes := request.GetClient().GetScopes()
+	for _, scope := range request.GetRequestedScopes() {
+		if !orGrantedScopes.Has(scope) {
+			// the requested scope wasn't previously granted to the refresh token.
+			// rather than fail here, we simply don't grant it.
+			continue
+		}
+
+		if !c.Config.GetScopeStrategy(ctx)(clientAllowedScopes, scope) {
 			return errorsx.WithStack(fosite.ErrInvalidScope.WithHintf("The OAuth 2.0 Client is not allowed to request scope '%s'.", scope))
 		}
+
 		request.GrantScope(scope)
 	}
 
@@ -149,6 +161,13 @@ func (c *RefreshTokenGrantHandler) PopulateTokenEndpointResponse(ctx context.Con
 
 	if err = c.TokenRevocationStorage.CreateAccessTokenSession(ctx, accessSignature, storeReq); err != nil {
 		return err
+	}
+
+	// the refresh token session should match the original session's granted scopes.
+	// the original requested scopes don't matter too much.
+	tsGrantedScopes := ts.GetGrantedScopes()
+	if rtStoreReq, ok := storeReq.(fosite.RefreshTokenRequester); ok {
+		rtStoreReq.ReplaceGrantedScopes(tsGrantedScopes)
 	}
 
 	if err = c.TokenRevocationStorage.CreateRefreshTokenSession(ctx, refreshSignature, storeReq); err != nil {
