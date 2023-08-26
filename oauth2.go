@@ -245,6 +245,16 @@ type Requester interface {
 	Sanitize(allowedParameters []string) Requester
 }
 
+// RefreshTokenAccessRequester is an extended AccessRequester implementation that allows preserving
+// the original Requester.
+type RefreshTokenAccessRequester interface {
+	// SanitizeRestoreRefreshTokenOriginalRequester returns a sanitized copy of this Requester and mutates the relevant
+	// values from the provided Requester which is the original refresh token session Requester.
+	SanitizeRestoreRefreshTokenOriginalRequester(requester Requester) Requester
+
+	AccessRequester
+}
+
 // AccessRequester is a token endpoint's request context.
 type AccessRequester interface {
 	// GetGrantType returns the requests grant type.
