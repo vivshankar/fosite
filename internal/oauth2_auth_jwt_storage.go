@@ -13,7 +13,7 @@ import (
 	time "time"
 
 	gomock "github.com/golang/mock/gomock"
-	jose "gopkg.in/square/go-jose.v2"
+	jose "github.com/go-jose/go-jose/v3"
 )
 
 // MockRFC7523KeyStorage is a mock of RFC7523KeyStorage interface.
