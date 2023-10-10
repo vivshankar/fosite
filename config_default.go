@@ -75,6 +75,18 @@ type Config struct {
 	// AuthorizeCodeLifespan sets how long an authorize code is going to be valid. Defaults to fifteen minutes.
 	AuthorizeCodeLifespan time.Duration
 
+	// Sets how long a device user/device code pair is valid for
+	DeviceAndUserCodeLifespan time.Duration
+
+	// DeviceVerificationURL is the URL of the device verification endpoint, this is is included with the device code request responses
+	DeviceVerificationURL string
+
+	// DeviceAuthTokenPollingInterval sets the interval that clients should check for device code grants
+	DeviceAuthTokenPollingInterval time.Duration
+
+	// DeviceEndpointHandlers is a list of handlers that are called before the device endpoint is served.
+	DeviceEndpointHandlers DeviceEndpointHandlers
+
 	// IDTokenLifespan sets the default id token lifetime. Defaults to one hour.
 	IDTokenLifespan time.Duration
 
@@ -356,6 +368,10 @@ func (c *Config) GetAudienceStrategy(_ context.Context) AudienceMatchingStrategy
 	return c.AudienceMatchingStrategy
 }
 
+func (c *Config) GetDeviceEndpointHandlers(ctx context.Context) DeviceEndpointHandlers {
+	return c.DeviceEndpointHandlers
+}
+
 // GetAuthorizeCodeLifespan returns how long an authorize code should be valid. Defaults to one fifteen minutes.
 func (c *Config) GetAuthorizeCodeLifespan(_ context.Context) time.Duration {
 	if c.AuthorizeCodeLifespan == 0 {
@@ -364,7 +380,15 @@ func (c *Config) GetAuthorizeCodeLifespan(_ context.Context) time.Duration {
 	return c.AuthorizeCodeLifespan
 }
 
-// GeIDTokenLifespan returns how long an id token should be valid. Defaults to one hour.
+// GetDeviceAndUserCodeLifespan returns the device and user code lifespan.
+func (c *Config) GetDeviceAndUserCodeLifespan(_ context.Context) time.Duration {
+	if c.DeviceAndUserCodeLifespan == 0 {
+		return time.Minute * 10
+	}
+	return c.DeviceAndUserCodeLifespan
+}
+
+// GetIDTokenLifespan returns how long an id token should be valid. Defaults to one hour.
 func (c *Config) GetIDTokenLifespan(_ context.Context) time.Duration {
 	if c.IDTokenLifespan == 0 {
 		return time.Hour
@@ -499,4 +523,19 @@ func (c *Config) GetTokenTypes(ctx context.Context) map[string]RFC8693TokenType 
 
 func (c *Config) GetDefaultRequestedTokenType(ctx context.Context) string {
 	return c.DefaultRequestedTokenType
+}
+
+func (c *Config) GetDeviceVerificationURL(_ context.Context) string {
+	return c.DeviceVerificationURL
+}
+
+/*func (c *Config) GetDeviceVerificationURLComplete(_ context.Context, userCode string) string {
+	return c.DeviceVerificationURL + "?user_code=" + userCode
+}*/
+
+func (c *Config) GetDeviceAuthTokenPollingInterval(_ context.Context) time.Duration {
+	if c.DeviceAuthTokenPollingInterval == 0 {
+		return time.Second * 10
+	}
+	return c.DeviceAuthTokenPollingInterval
 }

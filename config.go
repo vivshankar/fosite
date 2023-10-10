@@ -22,6 +22,24 @@ type AuthorizeCodeLifespanProvider interface {
 	GetAuthorizeCodeLifespan(ctx context.Context) time.Duration
 }
 
+// DeviceAndUserCodeLifespanProvider returns the provider for configuring the device and user code lifespan.
+type DeviceAndUserCodeLifespanProvider interface {
+	// GetDeviceAndUserCodeLifespan returns the device and user code lifespan.
+	GetDeviceAndUserCodeLifespan(ctx context.Context) time.Duration
+}
+
+/*type DeviceAuthorizeProvider interface {
+	GetDeviceDone(ctx context.Context) string
+}*/
+
+// DeviceProvider returns the provider for configuring the device authorization response
+// (see https://www.rfc-editor.org/rfc/rfc8628#section-3.2)
+type DeviceProvider interface {
+	GetDeviceVerificationURL(ctx context.Context) string
+	//GetDeviceVerificationURLComplete(ctx context.Context, userCode string) string
+	GetDeviceAuthTokenPollingInterval(ctx context.Context) time.Duration
+}
+
 // RefreshTokenLifespanProvider returns the provider for configuring the refresh token lifespan.
 type RefreshTokenLifespanProvider interface {
 	// GetRefreshTokenLifespan returns the refresh token lifespan.
@@ -267,6 +285,12 @@ type TokenIntrospectionHandlersProvider interface {
 type RevocationHandlersProvider interface {
 	// GetRevocationHandlers returns the revocation handlers.
 	GetRevocationHandlers(ctx context.Context) RevocationHandlers
+}
+
+// DeviceEndpointHandlersProvider returns the provider for setting up the Device handlers.
+type DeviceEndpointHandlersProvider interface {
+	// GetDeviceEndpointHandlers returns the handlers.
+	GetDeviceEndpointHandlers(ctx context.Context) DeviceEndpointHandlers
 }
 
 // PushedAuthorizeEndpointHandlersProvider returns the provider for configuring the PAR handlers.
