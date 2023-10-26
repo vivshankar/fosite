@@ -53,7 +53,7 @@ func TestDeviceUserVerificationHandler_HandleDeviceUserVerificationEndpointReque
 
 	defaultCheckFunc := func(t *testing.T, duvr fosite.DeviceUserVerificationResponder, a *args) {
 		assert.NotEmpty(t, duvr)
-		assert.Equal(t, a.status, duvr.GetStatus())
+		assert.Equal(t, fosite.DeviceAuthorizationStatusToString(a.status), duvr.GetStatus())
 	}
 
 	tests := []struct {
