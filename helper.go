@@ -43,3 +43,16 @@ func EscapeJSONString(str string) string {
 	str = strings.ReplaceAll(str, `"`, `\"`)
 	return str
 }
+
+func DeviceAuthorizationStatusToString(status DeviceAuthorizationStatus) string {
+	switch status {
+	case DeviceAuthorizationStatusApproved:
+		return "Approved"
+	case DeviceAuthorizationStatusDenied:
+		return "Denied"
+	case DeviceAuthorizationStatusNew:
+		return "New"
+	default:
+		return "Invalid"
+	}
+}

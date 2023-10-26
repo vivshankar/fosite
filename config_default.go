@@ -84,8 +84,11 @@ type Config struct {
 	// DeviceAuthTokenPollingInterval sets the interval that clients should check for device code grants
 	DeviceAuthTokenPollingInterval time.Duration
 
-	// DeviceEndpointHandlers is a list of handlers that are called before the device endpoint is served.
-	DeviceEndpointHandlers DeviceEndpointHandlers
+	// DeviceAuthorizationEndpointHandlers is a list of handlers that are called before the device authorization endpoint is served.
+	DeviceAuthorizationEndpointHandlers DeviceAuthorizationEndpointHandlers
+
+	// DeviceUserVerificationEndpointHandlers is a list of handlers that are called before the device grant user interaction endpoint is served.
+	DeviceUserVerificationEndpointHandlers DeviceUserVerificationEndpointHandlers
 
 	// IDTokenLifespan sets the default id token lifetime. Defaults to one hour.
 	IDTokenLifespan time.Duration
@@ -368,8 +371,12 @@ func (c *Config) GetAudienceStrategy(_ context.Context) AudienceMatchingStrategy
 	return c.AudienceMatchingStrategy
 }
 
-func (c *Config) GetDeviceEndpointHandlers(ctx context.Context) DeviceEndpointHandlers {
-	return c.DeviceEndpointHandlers
+func (c *Config) GetDeviceAuthorizationEndpointHandlers(_ context.Context) DeviceAuthorizationEndpointHandlers {
+	return c.DeviceAuthorizationEndpointHandlers
+}
+
+func (c *Config) GetDeviceUserVerificationEndpointHandlers(_ context.Context) DeviceUserVerificationEndpointHandlers {
+	return c.DeviceUserVerificationEndpointHandlers
 }
 
 // GetAuthorizeCodeLifespan returns how long an authorize code should be valid. Defaults to one fifteen minutes.

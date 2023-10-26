@@ -216,6 +216,11 @@ var (
 		ErrorField:       errDeviceExpiredToken,
 		CodeField:        http.StatusBadRequest,
 	}
+	ErrSlowDown = &RFC6749Error{
+		DescriptionField: "Too many requests within a short time period.",
+		ErrorField:       errSlowDown,
+		CodeField:        http.StatusBadRequest,
+	}
 )
 
 const (
@@ -255,6 +260,7 @@ const (
 	errJTIKnownName                 = "jti_known"
 	errAuthorizationPending         = "authorization_pending"
 	errDeviceExpiredToken           = "expired_token"
+	errSlowDown                     = "slow_down"
 )
 
 type (

@@ -18,11 +18,13 @@ import (
 
 type CodeTokenEndpointHandler interface {
 	ValidateGrantTypes(ctx context.Context, requester fosite.AccessRequester) error
-	ValidateCode(ctx context.Context, request fosite.AccessRequester, code string) error
-	GetCodeAndSession(ctx context.Context, request fosite.AccessRequester) (code string, signature string, authorizeRequest fosite.Requester, err error)
+	ValidateCodeAndSession(ctx context.Context, request fosite.AccessRequester, authorizeRequest fosite.Requester, code string) error
+	GetCodeAndSession(ctx context.Context, request fosite.AccessRequester) (string, string, fosite.Requester, error)
+	UpdateLastChecked(ctx context.Context, request fosite.AccessRequester, authorizeRequest fosite.Requester) error
 	InvalidateSession(ctx context.Context, signature string) error
 	CanSkipClientAuth(ctx context.Context, requester fosite.AccessRequester) bool
 	CanHandleTokenEndpointRequest(ctx context.Context, requester fosite.AccessRequester) bool
+	DeviceCodeSignature(ctx context.Context, code string) (string, error)
 }
 
 type GenericCodeTokenEndpointHandler struct {
@@ -55,7 +57,7 @@ func (c *GenericCodeTokenEndpointHandler) HandleTokenEndpointRequest(ctx context
 		if authorizeRequest == nil {
 			return fosite.ErrServerError.
 				WithHint("Misconfigured code lead to an error that prohibited the OAuth 2.0 Framework from processing this request.").
-				WithDebug("getCodeSession must return a value for \"fosite.Requester\" when returning \"ErrInvalidatedAuthorizeCode\" or \"ErrInvalidatedDeviceCode\".")
+				WithDebug(`getCodeSession must return a value for "fosite.Requester" when returning "ErrInvalidatedAuthorizeCode" or "ErrInvalidatedDeviceCode".`)
 		}
 
 		// If an authorize code is used twice, we revoke all refresh and access tokens associated with this request.
@@ -71,7 +73,7 @@ func (c *GenericCodeTokenEndpointHandler) HandleTokenEndpointRequest(ctx context
 			debug += "Revocation of refresh_token lead to error " + revErr.Error() + "."
 		}
 		return errorsx.WithStack(fosite.ErrInvalidGrant.WithHint(hint).WithDebug(debug))
-	} else if errors.Is(err, fosite.ErrAuthorizationPending) {
+	} else if errors.Is(err, fosite.ErrAuthorizationPending) || errors.Is(err, fosite.ErrAccessDenied) || errors.Is(err, fosite.ErrDeviceExpiredToken) || errors.Is(err, fosite.ErrSlowDown) {
 		return errorsx.WithStack(err)
 	} else if err != nil && errors.Is(err, fosite.ErrNotFound) {
 		return errorsx.WithStack(fosite.ErrInvalidGrant.WithWrap(err).WithDebug(err.Error()))
@@ -79,7 +81,14 @@ func (c *GenericCodeTokenEndpointHandler) HandleTokenEndpointRequest(ctx context
 		return errorsx.WithStack(fosite.ErrServerError.WithWrap(err).WithDebug(err.Error()))
 	}
 
-	err = c.ValidateCode(ctx, request, code)
+	// update last checked if there is error validating / processing the request.
+	defer func() {
+		if err != nil && authorizeRequest != nil {
+			_ = c.UpdateLastChecked(ctx, request, authorizeRequest)
+		}
+	}()
+
+	err = c.ValidateCodeAndSession(ctx, request, authorizeRequest, code)
 	if err != nil {
 		return errorsx.WithStack(err)
 	}
@@ -133,7 +142,7 @@ func (c *GenericCodeTokenEndpointHandler) PopulateTokenEndpointResponse(ctx cont
 	code, signature, authorizeRequest, err := c.GetCodeAndSession(ctx, requester)
 	if err != nil {
 		return errorsx.WithStack(fosite.ErrServerError.WithWrap(err).WithDebug(err.Error()))
-	} else if err := c.ValidateCode(ctx, requester, code); err != nil {
+	} else if err := c.ValidateCodeAndSession(ctx, requester, authorizeRequest, code); err != nil {
 		// This needs to happen after store retrieval for the session to be hydrated properly
 		return errorsx.WithStack(fosite.ErrInvalidRequest.WithWrap(err).WithDebug(err.Error()))
 	}

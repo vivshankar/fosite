@@ -33,8 +33,8 @@ import (
 	"github.com/ory/x/errorsx"
 )
 
-func (f *Fosite) NewDeviceRequest(ctx context.Context, req *http.Request) (DeviceRequester, error) {
-	request := NewDeviceRequest()
+func (f *Fosite) NewDeviceAuthorizationRequest(ctx context.Context, req *http.Request) (DeviceAuthorizationRequester, error) {
+	request := NewDeviceAuthorizationRequest()
 	request.Lang = i18n.GetLangFromRequest(f.Config.GetMessageCatalog(ctx), req)
 
 	if err := req.ParseForm(); err != nil {
@@ -59,7 +59,7 @@ func (f *Fosite) NewDeviceRequest(ctx context.Context, req *http.Request) (Devic
 	return request, nil
 }
 
-func (f *Fosite) validateDeviceScope(ctx context.Context, req *http.Request, request *DeviceRequest) error {
+func (f *Fosite) validateDeviceScope(ctx context.Context, _ *http.Request, request *DeviceAuthorizationRequest) error {
 	scope := RemoveEmpty(strings.Split(request.Form.Get("scope"), " "))
 	for _, permission := range scope {
 		if !f.Config.GetScopeStrategy(ctx)(request.Client.GetScopes(), permission) {

@@ -11,18 +11,23 @@ import (
 	"github.com/ory/x/errorsx"
 )
 
-type DeviceAuthHandler struct {
+type DeviceAuthorizationHandler struct {
 	Storage  RFC8628CodeStorage
 	Strategy RFC8628CodeStrategy
 	Config   interface {
-		fosite.DeviceProvider
+		fosite.DeviceAuthorizationProvider
 		fosite.DeviceAndUserCodeLifespanProvider
 	}
 }
 
-// HandleDeviceEndpointRequest is a response handler for the Device Authorisation Grant as
+// HandleDeviceAuthorizationEndpointRequest is a response handler for the Device Authorisation Grant as
 // defined in https://tools.ietf.org/html/rfc8628#section-3.1
-func (d *DeviceAuthHandler) HandleDeviceEndpointRequest(ctx context.Context, dar fosite.DeviceRequester, resp fosite.DeviceResponder) error {
+func (d *DeviceAuthorizationHandler) HandleDeviceAuthorizationEndpointRequest(ctx context.Context, dar fosite.DeviceAuthorizationRequester, resp fosite.DeviceResponder) error {
+	session, _ := dar.GetSession().(Session)
+	if session == nil {
+		return errorsx.WithStack(fosite.ErrServerError.WithDebug("Failed to perform device authorization because the session is not of the right type."))
+	}
+
 	deviceCode, deviceCodeSignature, err := d.Strategy.GenerateDeviceCode(ctx)
 	if err != nil {
 		return errorsx.WithStack(fosite.ErrServerError.WithWrap(err).WithDebug(err.Error()))
@@ -33,29 +38,29 @@ func (d *DeviceAuthHandler) HandleDeviceEndpointRequest(ctx context.Context, dar
 		return errorsx.WithStack(fosite.ErrServerError.WithWrap(err).WithDebug(err.Error()))
 	}
 
-	// Save the real request_id
-	requestId := dar.GetID()
+	dar.SetStatus(fosite.DeviceAuthorizationStatusNew)
 
-	// Store the User Code session (this has no real data other that the uer and device code), can be converted into a 'full' session after user auth
-	dar.GetSession().SetExpiresAt(fosite.DeviceCode, time.Now().UTC().Add(d.Config.GetDeviceAndUserCodeLifespan(ctx)))
-	if err := d.Storage.CreateDeviceCodeSession(ctx, deviceCodeSignature, dar.Sanitize(nil)); err != nil {
+	dar.SetDeviceCodeSignature(deviceCodeSignature)
+	dar.SetUserCodeSignature(userCodeSignature)
+
+	expireAt := time.Now().UTC().Add(d.Config.GetDeviceAndUserCodeLifespan(ctx)).Round(time.Second)
+	session.SetExpiresAt(fosite.DeviceCode, expireAt)
+	session.SetExpiresAt(fosite.UserCode, expireAt)
+
+	if err = d.Storage.CreateDeviceCodeSession(ctx, deviceCodeSignature, dar); err != nil {
 		return errorsx.WithStack(fosite.ErrServerError.WithWrap(err).WithDebug(err.Error()))
 	}
 
-	// Fake the RequestId field to store the DeviceCodeSignature for easy handling
-	dar.SetID(deviceCodeSignature)
-	dar.GetSession().SetExpiresAt(fosite.UserCode, time.Now().UTC().Add(d.Config.GetDeviceAndUserCodeLifespan(ctx)).Round(time.Second))
-	if err := d.Storage.CreateUserCodeSession(ctx, userCodeSignature, dar.Sanitize(nil)); err != nil {
+	if err = d.Storage.CreateUserCodeSession(ctx, userCodeSignature, dar); err != nil {
 		return errorsx.WithStack(fosite.ErrServerError.WithWrap(err).WithDebug(err.Error()))
 	}
-	dar.SetID(requestId)
 
 	// Populate the response fields
 	resp.SetDeviceCode(deviceCode)
 	resp.SetUserCode(userCode)
 	resp.SetVerificationURI(d.Config.GetDeviceVerificationURL(ctx))
 	resp.SetVerificationURIComplete(d.Config.GetDeviceVerificationURL(ctx) + "?user_code=" + userCode)
-	resp.SetExpiresIn(int64(time.Until(dar.GetSession().GetExpiresAt(fosite.UserCode)).Seconds()))
+	resp.SetExpiresIn(int64(time.Until(expireAt).Seconds()))
 	resp.SetInterval(int(d.Config.GetDeviceAuthTokenPollingInterval(ctx).Seconds()))
 	return nil
 }

@@ -515,7 +515,24 @@ func (s *MemoryStore) DeletePARSession(ctx context.Context, requestURI string) (
 	return nil
 }
 
-func (s *MemoryStore) CreateDeviceCodeSession(_ context.Context, signature string, req fosite.Requester) error {
+func (s *MemoryStore) SetTokenExchangeCustomJWT(ctx context.Context, jti string, exp time.Time) error {
+	// the memory store implementation is generic, so just re-use
+	return s.SetClientAssertionJWT(ctx, jti, exp)
+}
+
+// GetSubjectForTokenExchange computes the session subject and is used for token types where there is no way
+// to know the subject value. For some token types, such as access and refresh tokens, the subject is well-defined
+// and this function is not called.
+func (s *MemoryStore) GetSubjectForTokenExchange(ctx context.Context, requester fosite.Requester, subjectToken map[string]interface{}) (string, error) {
+	sub, _ := subjectToken["subject"].(string)
+	if sub == "" {
+		return "", fosite.ErrInvalidRequest.WithHint("No subject found.")
+	}
+
+	return sub, nil
+}
+
+func (s *MemoryStore) CreateDeviceCodeSession(ctx context.Context, signature string, request fosite.DeviceAuthorizationRequester) error {
 	// We first lock accessTokenRequestIDsMutex and then accessTokensMutex because this is the same order
 	// locking happens in RevokeAccessToken and using the same order prevents deadlocks.
 	s.deviceCodesRequestIDsMutex.Lock()
@@ -523,12 +540,12 @@ func (s *MemoryStore) CreateDeviceCodeSession(_ context.Context, signature strin
 	s.deviceCodesMutex.Lock()
 	defer s.deviceCodesMutex.Unlock()
 
-	s.DeviceCodes[signature] = req
-	s.DeviceCodesRequestIDs[req.GetID()] = signature
+	s.DeviceCodes[signature] = request
+	s.DeviceCodesRequestIDs[request.GetID()] = signature
 	return nil
 }
 
-func (s *MemoryStore) UpdateDeviceCodeSession(_ context.Context, signature string, req fosite.Requester) error {
+func (s *MemoryStore) UpdateDeviceCodeSession(ctx context.Context, signature string, request fosite.DeviceAuthorizationRequester) error {
 	s.deviceCodesRequestIDsMutex.Lock()
 	defer s.deviceCodesRequestIDsMutex.Unlock()
 	s.deviceCodesMutex.Lock()
@@ -536,17 +553,17 @@ func (s *MemoryStore) UpdateDeviceCodeSession(_ context.Context, signature strin
 
 	// Only update if exist
 	if _, exists := s.DeviceCodes[signature]; exists {
-		s.DeviceCodes[signature] = req
-		s.DeviceCodesRequestIDs[req.GetID()] = signature
+		s.DeviceCodes[signature] = request
+		s.DeviceCodesRequestIDs[request.GetID()] = signature
 	}
 	return nil
 }
 
-func (s *MemoryStore) GetDeviceCodeSession(_ context.Context, signature string, _ fosite.Session) (fosite.Requester, error) {
+func (s *MemoryStore) GetDeviceCodeSession(ctx context.Context, signature string, session fosite.Session) (fosite.DeviceAuthorizationRequester, error) {
 	s.deviceCodesMutex.RLock()
 	defer s.deviceCodesMutex.RUnlock()
 
-	rel, ok := s.DeviceCodes[signature]
+	rel, ok := s.DeviceCodes[signature].(fosite.DeviceAuthorizationRequester)
 	if !ok {
 		return nil, fosite.ErrNotFound
 	}
@@ -561,7 +578,7 @@ func (s *MemoryStore) InvalidateDeviceCodeSession(_ context.Context, code string
 	return nil
 }
 
-func (s *MemoryStore) CreateUserCodeSession(_ context.Context, signature string, req fosite.Requester) error {
+func (s *MemoryStore) CreateUserCodeSession(ctx context.Context, signature string, request fosite.DeviceAuthorizationRequester) error {
 	// We first lock accessTokenRequestIDsMutex and then accessTokensMutex because this is the same order
 	// locking happens in RevokeAccessToken and using the same order prevents deadlocks.
 	s.accessTokenRequestIDsMutex.Lock()
@@ -569,16 +586,16 @@ func (s *MemoryStore) CreateUserCodeSession(_ context.Context, signature string,
 	s.accessTokensMutex.Lock()
 	defer s.accessTokensMutex.Unlock()
 
-	s.AccessTokens[signature] = req
-	s.AccessTokenRequestIDs[req.GetID()] = signature
+	s.AccessTokens[signature] = request
+	s.AccessTokenRequestIDs[request.GetID()] = signature
 	return nil
 }
 
-func (s *MemoryStore) GetUserCodeSession(_ context.Context, signature string, _ fosite.Session) (fosite.Requester, error) {
+func (s *MemoryStore) GetUserCodeSession(ctx context.Context, signature string, session fosite.Session) (fosite.DeviceAuthorizationRequester, error) {
 	s.accessTokensMutex.RLock()
 	defer s.accessTokensMutex.RUnlock()
 
-	rel, ok := s.AccessTokens[signature]
+	rel, ok := s.AccessTokens[signature].(fosite.DeviceAuthorizationRequester)
 	if !ok {
 		return nil, fosite.ErrNotFound
 	}
@@ -590,5 +607,19 @@ func (s *MemoryStore) InvalidateUserCodeSession(_ context.Context, code string) 
 	defer s.userCodesMutex.Unlock()
 
 	delete(s.UserCodes, code)
+	return nil
+}
+
+func (s *MemoryStore) UpdateUserCodeSession(ctx context.Context, signature string, req fosite.DeviceAuthorizationRequester) error {
+	s.accessTokenRequestIDsMutex.Lock()
+	defer s.accessTokenRequestIDsMutex.Unlock()
+	s.accessTokensMutex.Lock()
+	defer s.accessTokensMutex.Unlock()
+
+	// Only update if exist
+	if _, exists := s.AccessTokens[signature]; exists {
+		s.AccessTokens[signature] = req
+		s.AccessTokenRequestIDs[req.GetID()] = signature
+	}
 	return nil
 }

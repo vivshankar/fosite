@@ -82,11 +82,25 @@ func (a *PushedAuthorizeEndpointHandlers) Append(h PushedAuthorizeEndpointHandle
 	*a = append(*a, h)
 }
 
-// DeviceEndpointHandlers is a list of DeviceEndpointHandler
-type DeviceEndpointHandlers []DeviceEndpointHandler
+// DeviceAuthorizationEndpointHandlers is a list of DeviceAuthorizationEndpointHandler
+type DeviceAuthorizationEndpointHandlers []DeviceAuthorizationEndpointHandler
 
-// Append adds an DeviceEndpointHandlers to this list. Ignores duplicates based on reflect.TypeOf.
-func (a *DeviceEndpointHandlers) Append(h DeviceEndpointHandler) {
+// Append adds an DeviceAuthorizationEndpointHandler to this list. Ignores duplicates based on reflect.TypeOf.
+func (a *DeviceAuthorizationEndpointHandlers) Append(h DeviceAuthorizationEndpointHandler) {
+	for _, this := range *a {
+		if reflect.TypeOf(this) == reflect.TypeOf(h) {
+			return
+		}
+	}
+
+	*a = append(*a, h)
+}
+
+// DeviceUserVerificationEndpointHandlers is a list of DeviceUserVerificationEndpointHandler
+type DeviceUserVerificationEndpointHandlers []DeviceUserVerificationEndpointHandler
+
+// Append adds an DeviceUserVerificationEndpointHandler to this list. Ignores duplicates based on reflect.TypeOf.
+func (a *DeviceUserVerificationEndpointHandlers) Append(h DeviceUserVerificationEndpointHandler) {
 	for _, this := range *a {
 		if reflect.TypeOf(this) == reflect.TypeOf(h) {
 			return
@@ -145,8 +159,9 @@ type Configurator interface {
 	TokenIntrospectionHandlersProvider
 	RevocationHandlersProvider
 	UseLegacyErrorFormatProvider
-	DeviceEndpointHandlersProvider
-	DeviceProvider
+	DeviceAuthorizationEndpointHandlersProvider
+	DeviceUserVerificationEndpointHandlersProvider
+	DeviceAuthorizationProvider
 	DeviceAndUserCodeLifespanProvider
 }
 

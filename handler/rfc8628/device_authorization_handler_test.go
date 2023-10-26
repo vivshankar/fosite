@@ -5,6 +5,8 @@ package rfc8628_test
 
 import (
 	"context"
+	"fmt"
+	"github.com/ory/fosite/handler/openid"
 	"testing"
 	"time"
 
@@ -19,13 +21,13 @@ func Test_HandleDeviceEndpointRequest(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	store := storage.NewMemoryStore()
-	handler := DeviceAuthHandler{
+	handler := DeviceAuthorizationHandler{
 		Storage:  store,
 		Strategy: &hmacshaStrategy,
 		Config: &fosite.Config{
 			DeviceAndUserCodeLifespan:      time.Minute * 10,
 			DeviceAuthTokenPollingInterval: time.Second * 10,
-			DeviceVerificationURL:          "www.test.com",
+			DeviceVerificationURL:          "https://www.test.com",
 			AccessTokenLifespan:            time.Hour,
 			RefreshTokenLifespan:           time.Hour,
 			ScopeStrategy:                  fosite.HierarchicScopeStrategy,
@@ -34,17 +36,22 @@ func Test_HandleDeviceEndpointRequest(t *testing.T) {
 		},
 	}
 
-	req := &fosite.Request{
-		Session: &fosite.DefaultSession{},
-	}
-	resp := &fosite.DeviceResponse{}
+	req := fosite.NewDeviceAuthorizationRequest()
+	req.SetSession(&DefaultSession{
+		DefaultSession: openid.NewDefaultSession(),
+	})
 
-	handler.HandleDeviceEndpointRequest(context.TODO(), req, resp)
+	resp := &fosite.DeviceAuthorizationResponse{}
 
+	err := handler.HandleDeviceAuthorizationEndpointRequest(context.TODO(), req, resp)
+
+	assert.NoError(t, err)
 	assert.NotEmpty(t, resp.GetDeviceCode())
 	assert.NotEmpty(t, resp.GetUserCode())
-	assert.Equal(t, len(resp.GetUserCode()), 8)
+	assert.Equal(t, 8, len(resp.GetUserCode()))
 	assert.Contains(t, resp.GetDeviceCode(), "ory_dc_")
 	assert.Contains(t, resp.GetDeviceCode(), ".")
-	assert.Equal(t, resp.GetVerificationURI(), "www.test.com")
+	assert.Equal(t, "https://www.test.com", resp.GetVerificationURI())
+	assert.Equal(t, fmt.Sprintf("https://www.test.com?user_code=%s", resp.GetUserCode()), resp.GetVerificationURIComplete())
+	assert.Equal(t, 10, resp.GetInterval())
 }

@@ -103,7 +103,7 @@ type OAuth2Provider interface {
 	// * https://tools.ietf.org/html/rfc6749#section-3.1.2.2 (everything MUST be implemented)
 	WriteAuthorizeResponse(ctx context.Context, rw http.ResponseWriter, requester AuthorizeRequester, responder AuthorizeResponder)
 
-	// NewDeviceRequest validate the OAuth 2.0 Device Authorization Flow Request
+	// NewDeviceAuthorizationRequest validate the OAuth 2.0 Device Authorization Flow Request
 	//
 	// The following specs must be considered in any implementation of this method:
 	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.1 (everything MUST be implemented)
@@ -111,25 +111,60 @@ type OAuth2Provider interface {
 	// omitted from the request.  The authorization server MUST ignore
 	// unrecognized request parameters.  Request and response parameters
 	// MUST NOT be included more than once.
-	NewDeviceRequest(ctx context.Context, req *http.Request) (DeviceRequester, error)
+	NewDeviceAuthorizationRequest(ctx context.Context, req *http.Request) (DeviceAuthorizationRequester, error)
 
-	// NewDeviceResponse persists the DeviceCodeSession and UserCodeSession in the store
+	// NewDeviceAuthorizationResponse persists the DeviceCodeSession and UserCodeSession in the store
 	//
 	// The following specs must be considered in any implementation of this method:
 	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.2 (everything MUST be implemented)
 	// In response, the authorization server generates a unique device
 	// verification code and an end-user code that are valid for a limited
 	// time
-	NewDeviceResponse(ctx context.Context, requester DeviceRequester) (DeviceResponder, error)
+	NewDeviceAuthorizationResponse(ctx context.Context, requester DeviceAuthorizationRequester, session Session) (DeviceResponder, error)
 
-	// WriteDeviceResponse return to the user both codes and
+	// WriteDeviceAuthorizationResponse return to the user both codes and
 	// some configuration informations in a JSON formated manner
 	//
 	// The following specs must be considered in any implementation of this method:
 	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.2 (everything MUST be implemented)
 	// Response is a HTTP response body using the
 	// "application/json" format [RFC8259] with a 200 (OK) status code.
-	WriteDeviceResponse(ctx context.Context, rw http.ResponseWriter, requester DeviceRequester, responder DeviceResponder)
+	WriteDeviceAuthorizationResponse(ctx context.Context, rw http.ResponseWriter, requester DeviceAuthorizationRequester, responder DeviceResponder)
+
+	// WriteDeviceUserVerificationResponse returns the device grant user verification result in a JSON formatted manner.
+	//
+	// The following specs must be considered in any implementation of this method:
+	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.3 (everything MUST be implemented)
+	// Response is a HTTP response body using the
+	// "application/json" format [RFC8259] with a 200 (OK) status code.
+	WriteDeviceUserVerificationResponse(cxt context.Context, rw http.ResponseWriter, requester DeviceAuthorizationRequester, responder DeviceUserVerificationResponder)
+
+	// WriteDeviceUserVerificationError returns the device grant user verification error in a JSON formatted manner.
+	//
+	// The following specs must be considered in any implementation of this method:
+	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.3 (everything MUST be implemented)
+	// Response is a HTTP response body using the
+	// "application/json" format [RFC8259] with a 200 (OK) status code.
+	WriteDeviceUserVerificationError(_ context.Context, rw http.ResponseWriter, requester DeviceAuthorizationRequester, err error)
+
+	// NewDeviceUserVerificationRequest validate the OAuth 2.0 Device Authorization Flow - User interaction Request
+	//
+	// The following specs must be considered in any implementation of this method:
+	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.3 (everything MUST be implemented)
+	// Parameters sent without a value MUST be treated as if they were
+	// omitted from the request. The authorization server MUST ignore
+	// unrecognized request parameters. Request and response parameters
+	// MUST NOT be included more than once.
+	NewDeviceUserVerificationRequest(ctx context.Context, req *http.Request) (DeviceAuthorizationRequester, error)
+
+	// NewDeviceUserVerificationResponse persists the DeviceCodeSession and UserCodeSession in the store
+	//
+	// The following specs must be considered in any implementation of this method:
+	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.2 (everything MUST be implemented)
+	// In response, the authorization server generates a unique device
+	// verification code and an end-user code that are valid for a limited
+	// time
+	NewDeviceUserVerificationResponse(ctx context.Context, requester DeviceAuthorizationRequester, session Session) (DeviceUserVerificationResponder, error)
 
 	// NewAccessRequest creates a new access request object and validates
 	// various parameters.
@@ -288,7 +323,7 @@ type RefreshTokenAccessRequester interface {
 
 // AccessRequester is a token endpoint's request context.
 type AccessRequester interface {
-	// GetGrantType returns the requests grant type.
+	// GetGrantTypes returns the requests grant type.
 	GetGrantTypes() (grantTypes Arguments)
 
 	Requester
@@ -328,8 +363,20 @@ type AuthorizeRequester interface {
 	Requester
 }
 
-// DeviceRequester is an device endpoint's request context.
-type DeviceRequester interface {
+// DeviceAuthorizationRequester is a device authorization endpoint's request context.
+type DeviceAuthorizationRequester interface {
+	// SetDeviceCodeSignature set the device code signature
+	SetDeviceCodeSignature(signature string)
+	// GetDeviceCodeSignature returns the device code signature
+	GetDeviceCodeSignature() string
+	// SetUserCodeSignature set the user code signature
+	SetUserCodeSignature(signature string)
+	// GetUserCodeSignature returns the user code signature
+	GetUserCodeSignature() string
+	SetStatus(status DeviceAuthorizationStatus)
+	GetStatus() DeviceAuthorizationStatus
+	SetLastChecked(lastChecked time.Time)
+	GetLastChecked() time.Time
 	Requester
 }
 
@@ -441,4 +488,31 @@ type DeviceResponder interface {
 
 	GetInterval() int
 	SetInterval(seconds int)
+
+	// SetExtra sets a key value pair for the access response.
+	SetExtra(key string, value interface{})
+
+	// GetExtra returns a key's value.
+	GetExtra(key string) interface{}
+}
+
+// DeviceUserVerificationResponder is device grant user verification endpoint response.
+type DeviceUserVerificationResponder interface {
+	// GetHeader returns the response's header
+	GetHeader() (header http.Header)
+
+	// AddHeader adds an header key value pair to the response
+	AddHeader(key, value string)
+
+	// GetParameters returns the response's parameters
+	GetParameters() (query url.Values)
+
+	// AddParameter adds key value pair to the response
+	AddParameter(key, value string)
+
+	// GetStatus returns the device grant user verification status
+	GetStatus() string
+
+	// SetStatus sets the device grant user verification status
+	SetStatus(status string)
 }
