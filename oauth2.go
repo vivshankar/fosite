@@ -515,4 +515,10 @@ type DeviceUserVerificationResponder interface {
 
 	// SetStatus sets the device grant user verification status
 	SetStatus(status string)
+
+	// SetExtra sets a key value pair for the access response.
+	SetExtra(key string, value interface{})
+
+	// GetExtra returns a key's value.
+	GetExtra(key string) interface{}
 }

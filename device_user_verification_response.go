@@ -16,9 +16,10 @@ var (
 
 // DeviceUserVerificationResponse is an implementation of DeviceUserVerificationResponder
 type DeviceUserVerificationResponse struct {
-	Header     http.Header `json:"-"`
-	Parameters url.Values  `json:"-"`
-	Status     string      `json:"status"`
+	Header     http.Header            `json:"-"`
+	Parameters url.Values             `json:"-"`
+	Status     string                 `json:"status"`
+	Extra      map[string]interface{} `json:"-"`
 }
 
 func NewDeviceUserVerificationResponse() *DeviceUserVerificationResponse {
@@ -58,4 +59,12 @@ func (d *DeviceUserVerificationResponse) ToJson(rw io.Writer) error {
 
 func (d *DeviceUserVerificationResponse) FromJson(r io.Reader) error {
 	return json.NewDecoder(r).Decode(&d)
+}
+
+func (d *DeviceUserVerificationResponse) SetExtra(key string, value interface{}) {
+	d.Extra[key] = value
+}
+
+func (d *DeviceUserVerificationResponse) GetExtra(key string) interface{} {
+	return d.Extra[key]
 }
