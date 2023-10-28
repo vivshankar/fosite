@@ -26,6 +26,7 @@ func NewDeviceUserVerificationResponse() *DeviceUserVerificationResponse {
 	return &DeviceUserVerificationResponse{
 		Header:     http.Header{},
 		Parameters: url.Values{},
+		Extra:      map[string]interface{}{},
 	}
 }
 
