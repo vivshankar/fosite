@@ -21,7 +21,7 @@ type CodeTokenEndpointHandler interface {
 	ValidateCodeAndSession(ctx context.Context, request fosite.AccessRequester, authorizeRequest fosite.Requester, code string) error
 	GetCodeAndSession(ctx context.Context, request fosite.AccessRequester) (string, string, fosite.Requester, error)
 	UpdateLastChecked(ctx context.Context, request fosite.AccessRequester, authorizeRequest fosite.Requester) error
-	InvalidateSession(ctx context.Context, signature string) error
+	InvalidateSession(ctx context.Context, signature string, authorizeRequest fosite.Requester) error
 	CanSkipClientAuth(ctx context.Context, requester fosite.AccessRequester) bool
 	CanHandleTokenEndpointRequest(ctx context.Context, requester fosite.AccessRequester) bool
 	DeviceCodeSignature(ctx context.Context, code string) (string, error)
@@ -73,7 +73,9 @@ func (c *GenericCodeTokenEndpointHandler) HandleTokenEndpointRequest(ctx context
 			debug += "Revocation of refresh_token lead to error " + revErr.Error() + "."
 		}
 		return errorsx.WithStack(fosite.ErrInvalidGrant.WithHint(hint).WithDebug(debug))
-	} else if errors.Is(err, fosite.ErrAuthorizationPending) || errors.Is(err, fosite.ErrAccessDenied) || errors.Is(err, fosite.ErrDeviceExpiredToken) || errors.Is(err, fosite.ErrSlowDown) {
+	} else if errors.Is(err, fosite.ErrAuthorizationPending) || errors.Is(err, fosite.ErrAccessDenied) ||
+		errors.Is(err, fosite.ErrDeviceExpiredToken) || errors.Is(err, fosite.ErrSlowDown) ||
+		errors.Is(err, fosite.ErrInvalidGrant) {
 		return errorsx.WithStack(err)
 	} else if err != nil && errors.Is(err, fosite.ErrNotFound) {
 		return errorsx.WithStack(fosite.ErrInvalidGrant.WithWrap(err).WithDebug(err.Error()))
@@ -180,7 +182,7 @@ func (c *GenericCodeTokenEndpointHandler) PopulateTokenEndpointResponse(ctx cont
 		}
 	}()
 
-	if err = c.InvalidateSession(ctx, signature); err != nil {
+	if err = c.InvalidateSession(ctx, signature, authorizeRequest); err != nil {
 		return errorsx.WithStack(fosite.ErrServerError.WithWrap(err).WithDebug(err.Error()))
 	}
 

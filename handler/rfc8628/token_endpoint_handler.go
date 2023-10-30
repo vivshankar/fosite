@@ -53,6 +53,11 @@ func (c *DeviceCodeTokenHandler) GetCodeAndSession(ctx context.Context, requeste
 		return "", "", nil, err
 	}
 
+	if deviceAuthReq.GetClient().GetID() != requester.GetClient().GetID() {
+		return "", "", nil, errorsx.WithStack(fosite.ErrInvalidGrant.
+			WithHint("The OAuth 2.0 Client ID from this request does not match the one from the authorize request."))
+	}
+
 	// check last requested time
 	lastReqTime := deviceAuthReq.GetLastChecked()
 	requestedAt := requester.GetRequestedAt()
@@ -80,11 +85,16 @@ func (c *DeviceCodeTokenHandler) GetCodeAndSession(ctx context.Context, requeste
 	if userAuthReq.GetStatus() == fosite.DeviceAuthorizationStatusNew {
 		_ = c.UpdateLastChecked(ctx, requester, deviceAuthReq)
 		return "", "", nil, errorsx.WithStack(fosite.ErrAuthorizationPending.WithHintf("The user has not authorized the request."))
-	} else if userAuthReq.GetStatus() != fosite.DeviceAuthorizationStatusApproved {
-		return "", "", nil, errorsx.WithStack(fosite.ErrAccessDenied.WithHintf("The has denied the request."))
 	}
 
+	// update status and session into access request and device authorization request
 	deviceAuthReq.Merge(userAuthReq)
+	requester.SetSession(deviceAuthReq.GetSession())
+	requester.SetID(deviceAuthReq.GetID())
+
+	if userAuthReq.GetStatus() != fosite.DeviceAuthorizationStatusApproved {
+		return "", "", nil, errorsx.WithStack(fosite.ErrAccessDenied.WithHintf("The user has denied the request."))
+	}
 
 	return code, signature, deviceAuthReq, err
 }
@@ -106,8 +116,15 @@ func (c *DeviceCodeTokenHandler) UpdateLastChecked(ctx context.Context, request 
 	return c.Storage.UpdateDeviceCodeSession(ctx, authReq.GetDeviceCodeSignature(), authReq)
 }
 
-func (c *DeviceCodeTokenHandler) InvalidateSession(ctx context.Context, signature string) error {
-	return c.Storage.InvalidateDeviceCodeSession(ctx, signature)
+func (c *DeviceCodeTokenHandler) InvalidateSession(ctx context.Context, signature string, authorizeRequest fosite.Requester) error {
+	if err := c.Storage.InvalidateDeviceCodeSession(ctx, signature); err != nil {
+		return err
+	}
+	if authReq, ok := authorizeRequest.(fosite.DeviceAuthorizationRequester); ok {
+		return c.Storage.InvalidateUserCodeSession(ctx, authReq.GetUserCodeSignature())
+	}
+
+	return nil
 }
 
 // implements CodeTokenEndpointHandler

@@ -572,6 +572,11 @@ func TestDeviceAuthorizeCodeTransactional_HandleTokenEndpointRequest(t *testing.
 					InvalidateDeviceCodeSession(gomock.Any(), gomock.Any()).
 					Return(nil).
 					Times(1)
+				mockDeviceStore.
+					EXPECT().
+					InvalidateUserCodeSession(gomock.Any(), gomock.Any()).
+					Return(nil).
+					Times(1)
 				mockCoreStore.
 					EXPECT().
 					CreateAccessTokenSession(propagatedContext, gomock.Any(), gomock.Any()).
@@ -639,6 +644,11 @@ func TestDeviceAuthorizeCodeTransactional_HandleTokenEndpointRequest(t *testing.
 				mockDeviceStore.
 					EXPECT().
 					InvalidateDeviceCodeSession(gomock.Any(), gomock.Any()).
+					Return(nil).
+					Times(1)
+				mockDeviceStore.
+					EXPECT().
+					InvalidateUserCodeSession(gomock.Any(), gomock.Any()).
 					Return(nil).
 					Times(1)
 				mockCoreStore.
@@ -724,6 +734,11 @@ func TestDeviceAuthorizeCodeTransactional_HandleTokenEndpointRequest(t *testing.
 				mockDeviceStore.
 					EXPECT().
 					InvalidateDeviceCodeSession(gomock.Any(), gomock.Any()).
+					Return(nil).
+					Times(1)
+				mockDeviceStore.
+					EXPECT().
+					InvalidateUserCodeSession(gomock.Any(), gomock.Any()).
 					Return(nil).
 					Times(1)
 				mockCoreStore.
