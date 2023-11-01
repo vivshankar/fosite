@@ -23,6 +23,11 @@ type OpenIDConnectDeviceAuthorizationHandler struct {
 	*IDTokenHandleHelper
 }
 
+var (
+	_ fosite.DeviceUserVerificationEndpointHandler = (*OpenIDConnectDeviceAuthorizationHandler)(nil)
+	_ fosite.TokenEndpointHandler                  = (*OpenIDConnectDeviceAuthorizationHandler)(nil)
+)
+
 func (c *OpenIDConnectDeviceAuthorizationHandler) ValidateRequest(_ context.Context, _ fosite.DeviceAuthorizationRequester) error {
 	return errorsx.WithStack(fosite.ErrUnknownRequest)
 }

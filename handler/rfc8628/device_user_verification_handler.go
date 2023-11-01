@@ -20,6 +20,10 @@ type DeviceUserVerificationHandler struct {
 	}
 }
 
+var (
+	_ fosite.DeviceUserVerificationEndpointHandler = (*DeviceUserVerificationHandler)(nil)
+)
+
 // HandleDeviceUserVerificationEndpointRequest is a response handler for the Device Authorisation Grant as
 // defined in https://tools.ietf.org/html/rfc8628#section-3.1
 func (d *DeviceUserVerificationHandler) HandleDeviceUserVerificationEndpointRequest(ctx context.Context, req fosite.DeviceAuthorizationRequester, resp fosite.DeviceUserVerificationResponder) error {
