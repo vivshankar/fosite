@@ -69,3 +69,10 @@ func (d *DeviceUserVerificationResponse) SetExtra(key string, value interface{})
 func (d *DeviceUserVerificationResponse) GetExtra(key string) interface{} {
 	return d.Extra[key]
 }
+
+// ToMap converts the response to a map.
+func (d *DeviceUserVerificationResponse) ToMap() map[string]interface{} {
+	d.Extra["status"] = d.Status
+
+	return d.Extra
+}

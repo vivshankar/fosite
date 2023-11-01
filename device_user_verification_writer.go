@@ -21,11 +21,12 @@ func (f *Fosite) WriteDeviceUserVerificationResponse(_ context.Context, rw http.
 	rw.Header().Set("Cache-Control", "no-store")
 	rw.Header().Set("Pragma", "no-cache")
 
-	deviceResponse := &DeviceUserVerificationResponse{
-		Status: responder.GetStatus(),
+	js, err := json.Marshal(responder.ToMap())
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
 	}
-
-	_ = deviceResponse.ToJson(rw)
+	_, _ = rw.Write(js)
 }
 
 func (f *Fosite) WriteDeviceUserVerificationError(ctx context.Context, rw http.ResponseWriter, req DeviceAuthorizationRequester, err error) {
