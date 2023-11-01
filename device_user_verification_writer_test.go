@@ -15,12 +15,12 @@ func TestFosite_WriteDeviceUserVerificationError(t *testing.T) {
 
 	rw := httptest.NewRecorder()
 	ar := &DeviceAuthorizationRequest{}
-	resp := &DeviceUserVerificationResponse{}
+	resp := &DeviceUserVerificationResponse{Extra: map[string]interface{}{}}
 
 	resp.SetStatus(DeviceAuthorizationStatusToString(DeviceAuthorizationStatusApproved))
 
 	oauth2.WriteDeviceUserVerificationResponse(context.Background(), rw, ar, resp)
-	wroteDeviceResponse := DeviceUserVerificationResponse{}
+	wroteDeviceResponse := DeviceUserVerificationResponse{Extra: map[string]interface{}{}}
 	err := wroteDeviceResponse.FromJson(rw.Body)
 	require.NoError(t, err)
 

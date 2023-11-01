@@ -41,7 +41,7 @@ func Test_HandleDeviceEndpointRequest(t *testing.T) {
 		DefaultSession: openid.NewDefaultSession(),
 	})
 
-	resp := &fosite.DeviceAuthorizationResponse{}
+	resp := &fosite.DeviceAuthorizationResponse{Extra: map[string]interface{}{}}
 
 	err := handler.HandleDeviceAuthorizationEndpointRequest(context.TODO(), req, resp)
 

@@ -95,8 +95,16 @@ func (d *DeviceAuthorizationResponse) FromJson(r io.Reader) error {
 	return json.NewDecoder(r).Decode(&d)
 }
 
-func (d *DeviceAuthorizationResponse) ToJson(rw io.Writer) error {
-	return json.NewEncoder(rw).Encode(&d)
+// ToMap converts the response to a map.
+func (d *DeviceAuthorizationResponse) ToMap() map[string]interface{} {
+	d.Extra["device_code"] = d.DeviceCode
+	d.Extra["user_code"] = d.UserCode
+	d.Extra["verification_uri"] = d.VerificationURI
+	d.Extra["verification_uri_complete"] = d.VerificationURIComplete
+	d.Extra["expires_in"] = d.ExpiresIn
+	d.Extra["interval"] = d.Interval
+
+	return d.Extra
 }
 
 func (d *DeviceAuthorizationResponse) SetExtra(key string, value interface{}) {

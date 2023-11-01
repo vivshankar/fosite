@@ -24,7 +24,7 @@ func TestWriteDeviceAuthorizeResponse(t *testing.T) {
 
 	rw := httptest.NewRecorder()
 	ar := &DeviceAuthorizationRequest{}
-	resp := &DeviceAuthorizationResponse{}
+	resp := &DeviceAuthorizationResponse{Extra: map[string]interface{}{}}
 	resp.SetUserCode("AAAA")
 	resp.SetDeviceCode("BBBB")
 	resp.SetInterval(int(
@@ -42,7 +42,7 @@ func TestWriteDeviceAuthorizeResponse(t *testing.T) {
 
 	assert.Equal(t, 200, rw.Code)
 
-	wroteDeviceResponse := DeviceAuthorizationResponse{}
+	wroteDeviceResponse := DeviceAuthorizationResponse{Extra: map[string]interface{}{}}
 	err := wroteDeviceResponse.FromJson(rw.Body)
 	require.NoError(t, err)
 

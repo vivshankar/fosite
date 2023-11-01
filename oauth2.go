@@ -494,6 +494,9 @@ type DeviceResponder interface {
 
 	// GetExtra returns a key's value.
 	GetExtra(key string) interface{}
+
+	// ToMap converts the response to a map.
+	ToMap() map[string]interface{}
 }
 
 // DeviceUserVerificationResponder is device grant user verification endpoint response.

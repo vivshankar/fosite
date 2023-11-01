@@ -5,6 +5,7 @@ package fosite
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 )
 
@@ -22,14 +23,10 @@ func (f *Fosite) WriteDeviceAuthorizationResponse(_ context.Context, rw http.Res
 	rw.Header().Set("Cache-Control", "no-store")
 	rw.Header().Set("Pragma", "no-cache")
 
-	deviceResponse := &DeviceAuthorizationResponse{
-		DeviceCode:              responder.GetDeviceCode(),
-		UserCode:                responder.GetUserCode(),
-		VerificationURI:         responder.GetVerificationURI(),
-		VerificationURIComplete: responder.GetVerificationURIComplete(),
-		ExpiresIn:               responder.GetExpiresIn(),
-		Interval:                responder.GetInterval(),
+	js, err := json.Marshal(responder.ToMap())
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
 	}
-
-	_ = deviceResponse.ToJson(rw)
+	_, _ = rw.Write(js)
 }
