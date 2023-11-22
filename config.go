@@ -306,3 +306,22 @@ type RFC8693ConfigProvider interface {
 
 	GetDefaultRequestedTokenType(ctx context.Context) string
 }
+
+// JWTValidationTimeSkewConfigProvider is configuration provider for JWT validation time skew.
+type JWTValidationTimeSkewConfigProvider interface {
+	// GetRequestObjectValidationTimeSkew is validation time skew for request object JWT 'iat', 'exp' and 'nbf'.
+	// For dcr, par or authorize.
+	GetRequestObjectValidationTimeSkew(ctx context.Context) time.Duration
+
+	// GetClientAssertionValidationTimeSkew is validation time skew for client assertion JWT 'iat', 'exp' and 'nbf'.
+	// For client authentication.
+	GetClientAssertionValidationTimeSkew(ctx context.Context) time.Duration
+
+	// GetJWTBearerValidationTimeSkew is validation time skew for JWT bearer 'iat', 'exp' and 'nbf'.
+	// For jwt bearer flow.
+	GetJWTBearerValidationTimeSkew(ctx context.Context) time.Duration
+
+	// GetJWTTokenValidationTimeSkew is validation time skew for JWT token 'iat', 'exp' and 'nbf.
+	// For token exchange flow.
+	GetJWTTokenValidationTimeSkew(ctx context.Context) time.Duration
+}

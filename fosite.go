@@ -131,6 +131,7 @@ type Configurator interface {
 	TokenIntrospectionHandlersProvider
 	RevocationHandlersProvider
 	UseLegacyErrorFormatProvider
+	JWTValidationTimeSkewConfigProvider
 }
 
 func NewOAuth2Provider(s Storage, c Configurator) *Fosite {
