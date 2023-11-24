@@ -23,8 +23,10 @@ const (
 	RefreshToken  TokenType = "refresh_token"
 	AuthorizeCode TokenType = "authorize_code"
 	IDToken       TokenType = "id_token"
-	DeviceCode    TokenType = "device_code"
-	UserCode      TokenType = "user_code"
+	// DeviceCode is the device_code that is produced as part of the device authorization grant flow
+	DeviceCode TokenType = "device_code"
+	// UserCode is the user_code that is produced as part of the device authorization grant flow
+	UserCode TokenType = "user_code"
 	// PushedAuthorizeRequestContext represents the PAR context object
 	PushedAuthorizeRequestContext TokenType = "par_context"
 
@@ -33,9 +35,9 @@ const (
 	GrantTypeAuthorizationCode GrantType = "authorization_code"
 	GrantTypePassword          GrantType = "password"
 	GrantTypeClientCredentials GrantType = "client_credentials"
-	GrantTypeJWTBearer         GrantType = "urn:ietf:params:oauth:grant-type:jwt-bearer" //nolint:gosec // this is not a hardcoded credential
-	GrantTypeTokenExchange     GrantType = "urn:ietf:params:oauth:grant-type:token-exchange"
-	GrantTypeDeviceCode        GrantType = "urn:ietf:params:oauth:grant-type:device_code" //nolint:gosec // this is not a hardcoded credential
+	GrantTypeJWTBearer         GrantType = "urn:ietf:params:oauth:grant-type:jwt-bearer"     //nolint:gosec // this is not a hardcoded credential
+	GrantTypeTokenExchange     GrantType = "urn:ietf:params:oauth:grant-type:token-exchange" //nolint:gosec // this is not a hardcoded credential
+	GrantTypeDeviceCode        GrantType = "urn:ietf:params:oauth:grant-type:device_code"    //nolint:gosec // this is not a hardcoded credential
 	BearerAccessToken          string    = "bearer"
 )
 
@@ -102,69 +104,6 @@ type OAuth2Provider interface {
 	//   making the authorization request.
 	// * https://tools.ietf.org/html/rfc6749#section-3.1.2.2 (everything MUST be implemented)
 	WriteAuthorizeResponse(ctx context.Context, rw http.ResponseWriter, requester AuthorizeRequester, responder AuthorizeResponder)
-
-	// NewDeviceAuthorizationRequest validate the OAuth 2.0 Device Authorization Flow Request
-	//
-	// The following specs must be considered in any implementation of this method:
-	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.1 (everything MUST be implemented)
-	// Parameters sent without a value MUST be treated as if they were
-	// omitted from the request.  The authorization server MUST ignore
-	// unrecognized request parameters.  Request and response parameters
-	// MUST NOT be included more than once.
-	NewDeviceAuthorizationRequest(ctx context.Context, req *http.Request) (DeviceAuthorizationRequester, error)
-
-	// NewDeviceAuthorizationResponse persists the DeviceCodeSession and UserCodeSession in the store
-	//
-	// The following specs must be considered in any implementation of this method:
-	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.2 (everything MUST be implemented)
-	// In response, the authorization server generates a unique device
-	// verification code and an end-user code that are valid for a limited
-	// time
-	NewDeviceAuthorizationResponse(ctx context.Context, requester DeviceAuthorizationRequester, session Session) (DeviceResponder, error)
-
-	// WriteDeviceAuthorizationResponse return to the user both codes and
-	// some configuration informations in a JSON formated manner
-	//
-	// The following specs must be considered in any implementation of this method:
-	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.2 (everything MUST be implemented)
-	// Response is a HTTP response body using the
-	// "application/json" format [RFC8259] with a 200 (OK) status code.
-	WriteDeviceAuthorizationResponse(ctx context.Context, rw http.ResponseWriter, requester DeviceAuthorizationRequester, responder DeviceResponder)
-
-	// WriteDeviceUserVerificationResponse returns the device grant user verification result in a JSON formatted manner.
-	//
-	// The following specs must be considered in any implementation of this method:
-	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.3 (everything MUST be implemented)
-	// Response is a HTTP response body using the
-	// "application/json" format [RFC8259] with a 200 (OK) status code.
-	WriteDeviceUserVerificationResponse(cxt context.Context, rw http.ResponseWriter, requester DeviceAuthorizationRequester, responder DeviceUserVerificationResponder)
-
-	// WriteDeviceUserVerificationError returns the device grant user verification error in a JSON formatted manner.
-	//
-	// The following specs must be considered in any implementation of this method:
-	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.3 (everything MUST be implemented)
-	// Response is a HTTP response body using the
-	// "application/json" format [RFC8259] with a 200 (OK) status code.
-	WriteDeviceUserVerificationError(_ context.Context, rw http.ResponseWriter, requester DeviceAuthorizationRequester, err error)
-
-	// NewDeviceUserVerificationRequest validate the OAuth 2.0 Device Authorization Flow - User interaction Request
-	//
-	// The following specs must be considered in any implementation of this method:
-	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.3 (everything MUST be implemented)
-	// Parameters sent without a value MUST be treated as if they were
-	// omitted from the request. The authorization server MUST ignore
-	// unrecognized request parameters. Request and response parameters
-	// MUST NOT be included more than once.
-	NewDeviceUserVerificationRequest(ctx context.Context, req *http.Request) (DeviceAuthorizationRequester, error)
-
-	// NewDeviceUserVerificationResponse persists the DeviceCodeSession and UserCodeSession in the store
-	//
-	// The following specs must be considered in any implementation of this method:
-	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.2 (everything MUST be implemented)
-	// In response, the authorization server generates a unique device
-	// verification code and an end-user code that are valid for a limited
-	// time
-	NewDeviceUserVerificationResponse(ctx context.Context, requester DeviceAuthorizationRequester, session Session) (DeviceUserVerificationResponder, error)
 
 	// NewAccessRequest creates a new access request object and validates
 	// various parameters.
@@ -233,6 +172,69 @@ type OAuth2Provider interface {
 
 	// WritePushedAuthorizeError writes the PAR error
 	WritePushedAuthorizeError(ctx context.Context, rw http.ResponseWriter, ar AuthorizeRequester, err error)
+
+	// NewDeviceAuthorizeRequest validate the OAuth 2.0 Device Authorization Flow Request
+	//
+	// The following specs must be considered in any implementation of this method:
+	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.1 (everything MUST be implemented)
+	// Parameters sent without a value MUST be treated as if they were
+	// omitted from the request.  The authorization server MUST ignore
+	// unrecognized request parameters.  Request and response parameters
+	// MUST NOT be included more than once.
+	NewDeviceAuthorizeRequest(ctx context.Context, req *http.Request) (DeviceAuthorizeRequester, error)
+
+	// NewDeviceAuthorizeResponse persists the DeviceCodeSession and UserCodeSession in the store
+	//
+	// The following specs must be considered in any implementation of this method:
+	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.2 (everything MUST be implemented)
+	// In response, the authorization server generates a unique device
+	// verification code and an end-user code that are valid for a limited
+	// time
+	NewDeviceAuthorizeResponse(ctx context.Context, requester DeviceAuthorizeRequester, session Session) (DeviceAuthorizeResponder, error)
+
+	// WriteDeviceAuthorizeResponse return to the user both codes and
+	// some configuration informations in a JSON formated manner
+	//
+	// The following specs must be considered in any implementation of this method:
+	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.2 (everything MUST be implemented)
+	// Response is a HTTP response body using the
+	// "application/json" format [RFC8259] with a 200 (OK) status code.
+	WriteDeviceAuthorizeResponse(ctx context.Context, rw http.ResponseWriter, requester DeviceAuthorizeRequester, responder DeviceAuthorizeResponder)
+
+	// WriteRFC8623UserAuthorizeResponse returns the device grant user verification result in a JSON formatted manner.
+	//
+	// The following specs must be considered in any implementation of this method:
+	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.3 (everything MUST be implemented)
+	// Response is a HTTP response body using the
+	// "application/json" format [RFC8259] with a 200 (OK) status code.
+	WriteRFC8623UserAuthorizeResponse(cxt context.Context, rw http.ResponseWriter, requester DeviceAuthorizeRequester, responder RFC8623UserAuthorizeResponder)
+
+	// WriteRFC8623UserAuthorizeError returns the device grant user verification error in a JSON formatted manner.
+	//
+	// The following specs must be considered in any implementation of this method:
+	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.3 (everything MUST be implemented)
+	// Response is a HTTP response body using the
+	// "application/json" format [RFC8259] with a 200 (OK) status code.
+	WriteRFC8623UserAuthorizeError(_ context.Context, rw http.ResponseWriter, requester DeviceAuthorizeRequester, err error)
+
+	// NewRFC8623UserAuthorizeRequest validate the OAuth 2.0 Device Authorization Flow - User interaction Request
+	//
+	// The following specs must be considered in any implementation of this method:
+	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.3 (everything MUST be implemented)
+	// Parameters sent without a value MUST be treated as if they were
+	// omitted from the request. The authorization server MUST ignore
+	// unrecognized request parameters. Request and response parameters
+	// MUST NOT be included more than once.
+	NewRFC8623UserAuthorizeRequest(ctx context.Context, req *http.Request) (DeviceAuthorizeRequester, error)
+
+	// NewRFC8623UserAuthorizeResponse persists the DeviceCodeSession and UserCodeSession in the store
+	//
+	// The following specs must be considered in any implementation of this method:
+	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.2 (everything MUST be implemented)
+	// In response, the authorization server generates a unique device
+	// verification code and an end-user code that are valid for a limited
+	// time
+	NewRFC8623UserAuthorizeResponse(ctx context.Context, requester DeviceAuthorizeRequester, session Session) (RFC8623UserAuthorizeResponder, error)
 }
 
 // IntrospectionResponder is the response object that will be returned when token introspection was successful,
@@ -363,8 +365,8 @@ type AuthorizeRequester interface {
 	Requester
 }
 
-// DeviceAuthorizationRequester is a device authorization endpoint's request context.
-type DeviceAuthorizationRequester interface {
+// DeviceAuthorizeRequester is a device authorization endpoint's request context.
+type DeviceAuthorizeRequester interface {
 	// SetDeviceCodeSignature set the device code signature
 	SetDeviceCodeSignature(signature string)
 	// GetDeviceCodeSignature returns the device code signature
@@ -373,8 +375,8 @@ type DeviceAuthorizationRequester interface {
 	SetUserCodeSignature(signature string)
 	// GetUserCodeSignature returns the user code signature
 	GetUserCodeSignature() string
-	SetStatus(status DeviceAuthorizationStatus)
-	GetStatus() DeviceAuthorizationStatus
+	SetStatus(status DeviceAuthorizeStatus)
+	GetStatus() DeviceAuthorizeStatus
 	SetLastChecked(lastChecked time.Time)
 	GetLastChecked() time.Time
 	Requester
@@ -465,7 +467,7 @@ type RFC8693TokenType interface {
 	GetType(ctx context.Context) string
 }
 
-type DeviceResponder interface {
+type DeviceAuthorizeResponder interface {
 	GetDeviceCode() string
 	SetDeviceCode(code string)
 
@@ -499,8 +501,8 @@ type DeviceResponder interface {
 	ToMap() map[string]interface{}
 }
 
-// DeviceUserVerificationResponder is device grant user verification endpoint response.
-type DeviceUserVerificationResponder interface {
+// RFC8623UserAuthorizeResponder is device grant user verification endpoint response.
+type RFC8623UserAuthorizeResponder interface {
 	// GetHeader returns the response's header
 	GetHeader() (header http.Header)
 

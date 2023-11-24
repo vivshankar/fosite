@@ -10,10 +10,10 @@ import (
 )
 
 var (
-	_ DeviceResponder = (*DeviceAuthorizationResponse)(nil)
+	_ DeviceAuthorizeResponder = (*DeviceAuthorizeResponse)(nil)
 )
 
-type DeviceAuthorizationResponse struct {
+type DeviceAuthorizeResponse struct {
 	Header                  http.Header            `json:"-"`
 	DeviceCode              string                 `json:"device_code"`
 	UserCode                string                 `json:"user_code"`
@@ -24,79 +24,79 @@ type DeviceAuthorizationResponse struct {
 	Extra                   map[string]interface{} `json:"-"`
 }
 
-func NewDeviceAuthorizationResponse() *DeviceAuthorizationResponse {
-	return &DeviceAuthorizationResponse{
+func NewDeviceAuthorizeResponse() *DeviceAuthorizeResponse {
+	return &DeviceAuthorizeResponse{
 		Extra: map[string]interface{}{},
 	}
 }
 
-func (d *DeviceAuthorizationResponse) GetDeviceCode() string {
+func (d *DeviceAuthorizeResponse) GetDeviceCode() string {
 	return d.DeviceCode
 }
 
 // SetDeviceCode returns the response's user code
-func (d *DeviceAuthorizationResponse) SetDeviceCode(code string) {
+func (d *DeviceAuthorizeResponse) SetDeviceCode(code string) {
 	d.DeviceCode = code
 }
 
-func (d *DeviceAuthorizationResponse) GetUserCode() string {
+func (d *DeviceAuthorizeResponse) GetUserCode() string {
 	return d.UserCode
 }
 
-func (d *DeviceAuthorizationResponse) SetUserCode(code string) {
+func (d *DeviceAuthorizeResponse) SetUserCode(code string) {
 	d.UserCode = code
 }
 
 // GetVerificationURI returns the response's verification uri
-func (d *DeviceAuthorizationResponse) GetVerificationURI() string {
+func (d *DeviceAuthorizeResponse) GetVerificationURI() string {
 	return d.VerificationURI
 }
 
-func (d *DeviceAuthorizationResponse) SetVerificationURI(uri string) {
+func (d *DeviceAuthorizeResponse) SetVerificationURI(uri string) {
 	d.VerificationURI = uri
 }
 
 // GetVerificationURIComplete returns the response's complete verification uri if set
-func (d *DeviceAuthorizationResponse) GetVerificationURIComplete() string {
+func (d *DeviceAuthorizeResponse) GetVerificationURIComplete() string {
 	return d.VerificationURIComplete
 }
 
-func (d *DeviceAuthorizationResponse) SetVerificationURIComplete(uri string) {
+func (d *DeviceAuthorizeResponse) SetVerificationURIComplete(uri string) {
 	d.VerificationURIComplete = uri
 }
 
 // GetExpiresIn returns the response's device code and user code lifetime in seconds if set
-func (d *DeviceAuthorizationResponse) GetExpiresIn() int64 {
+func (d *DeviceAuthorizeResponse) GetExpiresIn() int64 {
 	return d.ExpiresIn
 }
 
-func (d *DeviceAuthorizationResponse) SetExpiresIn(seconds int64) {
+func (d *DeviceAuthorizeResponse) SetExpiresIn(seconds int64) {
 	d.ExpiresIn = seconds
 }
 
 // GetInterval returns the response's polling interval if set
-func (d *DeviceAuthorizationResponse) GetInterval() int {
+func (d *DeviceAuthorizeResponse) GetInterval() int {
 	return d.Interval
 }
 
-func (d *DeviceAuthorizationResponse) SetInterval(seconds int) {
+func (d *DeviceAuthorizeResponse) SetInterval(seconds int) {
 	d.Interval = seconds
 }
 
-func (d *DeviceAuthorizationResponse) GetHeader() http.Header {
+func (d *DeviceAuthorizeResponse) GetHeader() http.Header {
 	return d.Header
 }
 
-func (d *DeviceAuthorizationResponse) AddHeader(key, value string) {
+func (d *DeviceAuthorizeResponse) AddHeader(key, value string) {
 	d.Header.Add(key, value)
 }
 
-func (d *DeviceAuthorizationResponse) FromJson(r io.Reader) error {
+func (d *DeviceAuthorizeResponse) FromJson(r io.Reader) error {
 	return json.NewDecoder(r).Decode(&d)
 }
 
 // ToMap converts the response to a map.
-func (d *DeviceAuthorizationResponse) ToMap() map[string]interface{} {
+func (d *DeviceAuthorizeResponse) ToMap() map[string]interface{} {
 	d.Extra["device_code"] = d.DeviceCode
 	d.Extra["user_code"] = d.UserCode
 	d.Extra["verification_uri"] = d.VerificationURI
@@ -107,10 +107,10 @@ func (d *DeviceAuthorizationResponse) ToMap() map[string]interface{} {
 	return d.Extra
 }
 
-func (d *DeviceAuthorizationResponse) SetExtra(key string, value interface{}) {
+func (d *DeviceAuthorizeResponse) SetExtra(key string, value interface{}) {
 	d.Extra[key] = value
 }
 
-func (d *DeviceAuthorizationResponse) GetExtra(key string) interface{} {
+func (d *DeviceAuthorizeResponse) GetExtra(key string) interface{} {
 	return d.Extra[key]
 }

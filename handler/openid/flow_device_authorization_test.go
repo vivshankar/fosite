@@ -6,17 +6,18 @@ package openid
 import (
 	"context"
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/golang/mock/gomock"
 	"github.com/ory/fosite"
 	"github.com/ory/fosite/internal"
 	"github.com/ory/fosite/token/jwt"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
-func TestOpenIDConnectDeviceAuthorizationHandler_HandleDeviceUserVerificationEndpointRequest(t *testing.T) {
+func TestOpenIDConnectDeviceAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -37,7 +38,7 @@ func TestOpenIDConnectDeviceAuthorizationHandler_HandleDeviceUserVerificationEnd
 	oidcStore := internal.NewMockOpenIDConnectRequestStorage(ctrl)
 	tokenHandler := internal.NewMockCodeTokenEndpointHandler(ctrl)
 
-	handler := &OpenIDConnectDeviceAuthorizationHandler{
+	handler := &OpenIDConnectDeviceAuthorizeHandler{
 		OpenIDConnectRequestStorage:   oidcStore,
 		OpenIDConnectRequestValidator: NewOpenIDConnectRequestValidator(j.Signer, config),
 		CodeTokenEndpointHandler:      tokenHandler,
@@ -46,8 +47,8 @@ func TestOpenIDConnectDeviceAuthorizationHandler_HandleDeviceUserVerificationEnd
 			IDTokenStrategy: j,
 		},
 	}
-	req := fosite.NewDeviceAuthorizationRequest()
-	resp := fosite.NewDeviceUserVerificationResponse()
+	req := fosite.NewDeviceAuthorizeRequest()
+	resp := fosite.NewRFC8623UserAuthorizeResponse()
 
 	for k, c := range []struct {
 		description string
@@ -106,7 +107,7 @@ func TestOpenIDConnectDeviceAuthorizationHandler_HandleDeviceUserVerificationEnd
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 			c.setup()
-			err := handler.HandleDeviceUserVerificationEndpointRequest(context.TODO(), req, resp)
+			err := handler.PopulateRFC8623UserAuthorizeEndpointResponse(context.TODO(), req, resp)
 
 			if c.expectErr != nil {
 				require.EqualError(t, err, c.expectErr.Error())
@@ -117,7 +118,7 @@ func TestOpenIDConnectDeviceAuthorizationHandler_HandleDeviceUserVerificationEnd
 	}
 }
 
-func TestOpenIDConnectDeviceAuthorizationHandler_PopulateTokenEndpointResponse(t *testing.T) {
+func TestOpenIDConnectDeviceAuthorizeHandler_PopulateTokenEndpointResponse(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -138,7 +139,7 @@ func TestOpenIDConnectDeviceAuthorizationHandler_PopulateTokenEndpointResponse(t
 	oidcStore := internal.NewMockOpenIDConnectRequestStorage(ctrl)
 	tokenHandler := internal.NewMockCodeTokenEndpointHandler(ctrl)
 
-	handler := &OpenIDConnectDeviceAuthorizationHandler{
+	handler := &OpenIDConnectDeviceAuthorizeHandler{
 		OpenIDConnectRequestStorage:   oidcStore,
 		OpenIDConnectRequestValidator: NewOpenIDConnectRequestValidator(j.Signer, config),
 		CodeTokenEndpointHandler:      tokenHandler,

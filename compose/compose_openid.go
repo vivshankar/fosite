@@ -82,7 +82,7 @@ func OpenIDConnectHybridFactory(config fosite.Configurator, storage interface{},
 }
 
 func OpenIDConnectDeviceAuthorizationFactory(config fosite.Configurator, storage interface{}, strategy interface{}) interface{} {
-	return &openid.OpenIDConnectDeviceAuthorizationHandler{
+	return &openid.OpenIDConnectDeviceAuthorizeHandler{
 		OpenIDConnectRequestStorage:   storage.(openid.OpenIDConnectRequestStorage),
 		OpenIDConnectRequestValidator: openid.NewOpenIDConnectRequestValidator(strategy.(jwt.Signer), config),
 		CodeTokenEndpointHandler: &rfc8628.DeviceCodeTokenHandler{

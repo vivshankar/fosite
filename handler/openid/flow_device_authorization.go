@@ -6,12 +6,13 @@ package openid
 import (
 	"context"
 	"errors"
+
 	"github.com/ory/fosite"
 	"github.com/ory/fosite/handler/oauth2"
 	"github.com/ory/x/errorsx"
 )
 
-type OpenIDConnectDeviceAuthorizationHandler struct {
+type OpenIDConnectDeviceAuthorizeHandler struct {
 	OpenIDConnectRequestStorage   OpenIDConnectRequestStorage
 	OpenIDConnectRequestValidator *OpenIDConnectRequestValidator
 	oauth2.CodeTokenEndpointHandler
@@ -24,15 +25,15 @@ type OpenIDConnectDeviceAuthorizationHandler struct {
 }
 
 var (
-	_ fosite.DeviceUserVerificationEndpointHandler = (*OpenIDConnectDeviceAuthorizationHandler)(nil)
-	_ fosite.TokenEndpointHandler                  = (*OpenIDConnectDeviceAuthorizationHandler)(nil)
+	_ fosite.RFC8623UserAuthorizeEndpointHandler = (*OpenIDConnectDeviceAuthorizeHandler)(nil)
+	_ fosite.TokenEndpointHandler                = (*OpenIDConnectDeviceAuthorizeHandler)(nil)
 )
 
-func (c *OpenIDConnectDeviceAuthorizationHandler) ValidateRequest(_ context.Context, _ fosite.DeviceAuthorizationRequester) error {
+func (c *OpenIDConnectDeviceAuthorizeHandler) HandleRFC8623UserAuthorizeEndpointRequest(_ context.Context, _ fosite.DeviceAuthorizeRequester) error {
 	return errorsx.WithStack(fosite.ErrUnknownRequest)
 }
 
-func (c *OpenIDConnectDeviceAuthorizationHandler) HandleDeviceUserVerificationEndpointRequest(ctx context.Context, req fosite.DeviceAuthorizationRequester, _ fosite.DeviceUserVerificationResponder) error {
+func (c *OpenIDConnectDeviceAuthorizeHandler) PopulateRFC8623UserAuthorizeEndpointResponse(ctx context.Context, req fosite.DeviceAuthorizeRequester, _ fosite.RFC8623UserAuthorizeResponder) error {
 	if !(req.GetGrantedScopes().Has("openid")) {
 		return nil
 	}
@@ -52,11 +53,11 @@ func (c *OpenIDConnectDeviceAuthorizationHandler) HandleDeviceUserVerificationEn
 	return nil
 }
 
-func (c *OpenIDConnectDeviceAuthorizationHandler) HandleTokenEndpointRequest(_ context.Context, _ fosite.AccessRequester) error {
+func (c *OpenIDConnectDeviceAuthorizeHandler) HandleTokenEndpointRequest(_ context.Context, _ fosite.AccessRequester) error {
 	return errorsx.WithStack(fosite.ErrUnknownRequest)
 }
 
-func (c *OpenIDConnectDeviceAuthorizationHandler) PopulateTokenEndpointResponse(ctx context.Context, requester fosite.AccessRequester, responder fosite.AccessResponder) error {
+func (c *OpenIDConnectDeviceAuthorizeHandler) PopulateTokenEndpointResponse(ctx context.Context, requester fosite.AccessRequester, responder fosite.AccessResponder) error {
 	if !c.CanHandleTokenEndpointRequest(ctx, requester) {
 		return errorsx.WithStack(fosite.ErrUnknownRequest)
 	}
@@ -96,10 +97,10 @@ func (c *OpenIDConnectDeviceAuthorizationHandler) PopulateTokenEndpointResponse(
 	return c.IssueExplicitIDToken(ctx, idTokenLifespan, authorize, responder)
 }
 
-func (c *OpenIDConnectDeviceAuthorizationHandler) CanSkipClientAuth(_ context.Context, _ fosite.AccessRequester) bool {
+func (c *OpenIDConnectDeviceAuthorizeHandler) CanSkipClientAuth(_ context.Context, _ fosite.AccessRequester) bool {
 	return false
 }
 
-func (c *OpenIDConnectDeviceAuthorizationHandler) CanHandleTokenEndpointRequest(_ context.Context, requester fosite.AccessRequester) bool {
+func (c *OpenIDConnectDeviceAuthorizeHandler) CanHandleTokenEndpointRequest(_ context.Context, requester fosite.AccessRequester) bool {
 	return requester.GetGrantTypes().ExactOne(string(fosite.GrantTypeDeviceCode))
 }

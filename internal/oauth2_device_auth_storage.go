@@ -36,7 +36,7 @@ func (m *MockRFC8628CodeStorage) EXPECT() *MockRFC8628CodeStorageMockRecorder {
 }
 
 // CreateDeviceCodeSession mocks base method.
-func (m *MockRFC8628CodeStorage) CreateDeviceCodeSession(ctx context.Context, signature string, request fosite.DeviceAuthorizationRequester) error {
+func (m *MockRFC8628CodeStorage) CreateDeviceCodeSession(ctx context.Context, signature string, request fosite.DeviceAuthorizeRequester) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateDeviceCodeSession", ctx, signature, request)
 	ret0, _ := ret[0].(error)
@@ -50,7 +50,7 @@ func (mr *MockRFC8628CodeStorageMockRecorder) CreateDeviceCodeSession(ctx, signa
 }
 
 // CreateUserCodeSession mocks base method.
-func (m *MockRFC8628CodeStorage) CreateUserCodeSession(ctx context.Context, signature string, request fosite.DeviceAuthorizationRequester) error {
+func (m *MockRFC8628CodeStorage) CreateUserCodeSession(ctx context.Context, signature string, request fosite.DeviceAuthorizeRequester) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUserCodeSession", ctx, signature, request)
 	ret0, _ := ret[0].(error)
@@ -64,10 +64,10 @@ func (mr *MockRFC8628CodeStorageMockRecorder) CreateUserCodeSession(ctx, signatu
 }
 
 // GetDeviceCodeSession mocks base method.
-func (m *MockRFC8628CodeStorage) GetDeviceCodeSession(ctx context.Context, signature string, session fosite.Session) (fosite.DeviceAuthorizationRequester, error) {
+func (m *MockRFC8628CodeStorage) GetDeviceCodeSession(ctx context.Context, signature string, session fosite.Session) (fosite.DeviceAuthorizeRequester, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetDeviceCodeSession", ctx, signature, session)
-	ret0, _ := ret[0].(fosite.DeviceAuthorizationRequester)
+	ret0, _ := ret[0].(fosite.DeviceAuthorizeRequester)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -79,10 +79,10 @@ func (mr *MockRFC8628CodeStorageMockRecorder) GetDeviceCodeSession(ctx, signatur
 }
 
 // GetUserCodeSession mocks base method.
-func (m *MockRFC8628CodeStorage) GetUserCodeSession(ctx context.Context, signature string, session fosite.Session) (fosite.DeviceAuthorizationRequester, error) {
+func (m *MockRFC8628CodeStorage) GetUserCodeSession(ctx context.Context, signature string, session fosite.Session) (fosite.DeviceAuthorizeRequester, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserCodeSession", ctx, signature, session)
-	ret0, _ := ret[0].(fosite.DeviceAuthorizationRequester)
+	ret0, _ := ret[0].(fosite.DeviceAuthorizeRequester)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -122,7 +122,7 @@ func (mr *MockRFC8628CodeStorageMockRecorder) InvalidateUserCodeSession(ctx, sig
 }
 
 // UpdateDeviceCodeSession mocks base method.
-func (m *MockRFC8628CodeStorage) UpdateDeviceCodeSession(ctx context.Context, signature string, request fosite.DeviceAuthorizationRequester) error {
+func (m *MockRFC8628CodeStorage) UpdateDeviceCodeSession(ctx context.Context, signature string, request fosite.DeviceAuthorizeRequester) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateDeviceCodeSession", ctx, signature, request)
 	ret0, _ := ret[0].(error)
@@ -136,7 +136,7 @@ func (mr *MockRFC8628CodeStorageMockRecorder) UpdateDeviceCodeSession(ctx, signa
 }
 
 // UpdateUserCodeSession mocks base method.
-func (m *MockRFC8628CodeStorage) UpdateUserCodeSession(ctx context.Context, signature string, req fosite.DeviceAuthorizationRequester) error {
+func (m *MockRFC8628CodeStorage) UpdateUserCodeSession(ctx context.Context, signature string, req fosite.DeviceAuthorizeRequester) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUserCodeSession", ctx, signature, req)
 	ret0, _ := ret[0].(error)
@@ -173,7 +173,7 @@ func (m *MockDeviceCodeStorage) EXPECT() *MockDeviceCodeStorageMockRecorder {
 }
 
 // CreateDeviceCodeSession mocks base method.
-func (m *MockDeviceCodeStorage) CreateDeviceCodeSession(ctx context.Context, signature string, request fosite.DeviceAuthorizationRequester) error {
+func (m *MockDeviceCodeStorage) CreateDeviceCodeSession(ctx context.Context, signature string, request fosite.DeviceAuthorizeRequester) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateDeviceCodeSession", ctx, signature, request)
 	ret0, _ := ret[0].(error)
@@ -187,10 +187,10 @@ func (mr *MockDeviceCodeStorageMockRecorder) CreateDeviceCodeSession(ctx, signat
 }
 
 // GetDeviceCodeSession mocks base method.
-func (m *MockDeviceCodeStorage) GetDeviceCodeSession(ctx context.Context, signature string, session fosite.Session) (fosite.DeviceAuthorizationRequester, error) {
+func (m *MockDeviceCodeStorage) GetDeviceCodeSession(ctx context.Context, signature string, session fosite.Session) (fosite.DeviceAuthorizeRequester, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetDeviceCodeSession", ctx, signature, session)
-	ret0, _ := ret[0].(fosite.DeviceAuthorizationRequester)
+	ret0, _ := ret[0].(fosite.DeviceAuthorizeRequester)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -216,7 +216,7 @@ func (mr *MockDeviceCodeStorageMockRecorder) InvalidateDeviceCodeSession(ctx, si
 }
 
 // UpdateDeviceCodeSession mocks base method.
-func (m *MockDeviceCodeStorage) UpdateDeviceCodeSession(ctx context.Context, signature string, request fosite.DeviceAuthorizationRequester) error {
+func (m *MockDeviceCodeStorage) UpdateDeviceCodeSession(ctx context.Context, signature string, request fosite.DeviceAuthorizeRequester) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateDeviceCodeSession", ctx, signature, request)
 	ret0, _ := ret[0].(error)
@@ -253,7 +253,7 @@ func (m *MockUserCodeStorage) EXPECT() *MockUserCodeStorageMockRecorder {
 }
 
 // CreateUserCodeSession mocks base method.
-func (m *MockUserCodeStorage) CreateUserCodeSession(ctx context.Context, signature string, request fosite.DeviceAuthorizationRequester) error {
+func (m *MockUserCodeStorage) CreateUserCodeSession(ctx context.Context, signature string, request fosite.DeviceAuthorizeRequester) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUserCodeSession", ctx, signature, request)
 	ret0, _ := ret[0].(error)
@@ -267,10 +267,10 @@ func (mr *MockUserCodeStorageMockRecorder) CreateUserCodeSession(ctx, signature,
 }
 
 // GetUserCodeSession mocks base method.
-func (m *MockUserCodeStorage) GetUserCodeSession(ctx context.Context, signature string, session fosite.Session) (fosite.DeviceAuthorizationRequester, error) {
+func (m *MockUserCodeStorage) GetUserCodeSession(ctx context.Context, signature string, session fosite.Session) (fosite.DeviceAuthorizeRequester, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserCodeSession", ctx, signature, session)
-	ret0, _ := ret[0].(fosite.DeviceAuthorizationRequester)
+	ret0, _ := ret[0].(fosite.DeviceAuthorizeRequester)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -296,7 +296,7 @@ func (mr *MockUserCodeStorageMockRecorder) InvalidateUserCodeSession(ctx, signat
 }
 
 // UpdateUserCodeSession mocks base method.
-func (m *MockUserCodeStorage) UpdateUserCodeSession(ctx context.Context, signature string, req fosite.DeviceAuthorizationRequester) error {
+func (m *MockUserCodeStorage) UpdateUserCodeSession(ctx context.Context, signature string, req fosite.DeviceAuthorizeRequester) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUserCodeSession", ctx, signature, req)
 	ret0, _ := ret[0].(error)

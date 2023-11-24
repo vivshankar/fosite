@@ -1,6 +1,3 @@
-// Copyright © 2023 Ory Corp
-// SPDX-License-Identifier: Apache-2.0
-
 package rfc8628
 
 import (
@@ -11,22 +8,19 @@ import (
 	"github.com/ory/x/errorsx"
 )
 
-type DeviceAuthorizationHandler struct {
+type DeviceAuthorizeHandler struct {
 	Storage  RFC8628CodeStorage
 	Strategy RFC8628CodeStrategy
 	Config   interface {
-		fosite.DeviceAuthorizationProvider
+		fosite.DeviceAuthorizeConfigProvider
 		fosite.DeviceAndUserCodeLifespanProvider
 	}
 }
 
-// HandleDeviceAuthorizationEndpointRequest is a response handler for the Device Authorisation Grant as
+// HandleDeviceAuthorizeEndpointRequest is a response handler for the Device Authorisation Grant as
 // defined in https://tools.ietf.org/html/rfc8628#section-3.1
-func (d *DeviceAuthorizationHandler) HandleDeviceAuthorizationEndpointRequest(ctx context.Context, dar fosite.DeviceAuthorizationRequester, resp fosite.DeviceResponder) error {
-	session, _ := dar.GetSession().(Session)
-	if session == nil {
-		return errorsx.WithStack(fosite.ErrServerError.WithDebug("Failed to perform device authorization because the session is not of the right type."))
-	}
+func (d *DeviceAuthorizeHandler) HandleDeviceAuthorizeEndpointRequest(ctx context.Context, dar fosite.DeviceAuthorizeRequester, resp fosite.DeviceAuthorizeResponder) error {
+	session := dar.GetSession()
 
 	deviceCode, deviceCodeSignature, err := d.Strategy.GenerateDeviceCode(ctx)
 	if err != nil {
@@ -38,7 +32,7 @@ func (d *DeviceAuthorizationHandler) HandleDeviceAuthorizationEndpointRequest(ct
 		return errorsx.WithStack(fosite.ErrServerError.WithWrap(err).WithDebug(err.Error()))
 	}
 
-	dar.SetStatus(fosite.DeviceAuthorizationStatusNew)
+	dar.SetStatus(fosite.DeviceAuthorizeStatusNew)
 
 	dar.SetDeviceCodeSignature(deviceCodeSignature)
 	dar.SetUserCodeSignature(userCodeSignature)
@@ -58,8 +52,8 @@ func (d *DeviceAuthorizationHandler) HandleDeviceAuthorizationEndpointRequest(ct
 	// Populate the response fields
 	resp.SetDeviceCode(deviceCode)
 	resp.SetUserCode(userCode)
-	resp.SetVerificationURI(d.Config.GetDeviceVerificationURL(ctx))
-	resp.SetVerificationURIComplete(d.Config.GetDeviceVerificationURL(ctx) + "?user_code=" + userCode)
+	resp.SetVerificationURI(d.Config.GetRFC8623UserVerificationURL(ctx))
+	resp.SetVerificationURIComplete(d.Config.GetRFC8623UserVerificationURL(ctx) + "?user_code=" + userCode)
 	resp.SetExpiresIn(int64(time.Until(expireAt).Seconds()))
 	resp.SetInterval(int(d.Config.GetDeviceAuthTokenPollingInterval(ctx).Seconds()))
 	return nil

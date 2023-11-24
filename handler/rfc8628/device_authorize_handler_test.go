@@ -6,9 +6,10 @@ package rfc8628_test
 import (
 	"context"
 	"fmt"
-	"github.com/ory/fosite/handler/openid"
 	"testing"
 	"time"
+
+	"github.com/ory/fosite/handler/openid"
 
 	"github.com/golang/mock/gomock"
 	"github.com/ory/fosite"
@@ -21,13 +22,13 @@ func Test_HandleDeviceEndpointRequest(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	store := storage.NewMemoryStore()
-	handler := DeviceAuthorizationHandler{
+	handler := DeviceAuthorizeHandler{
 		Storage:  store,
 		Strategy: &hmacshaStrategy,
 		Config: &fosite.Config{
 			DeviceAndUserCodeLifespan:      time.Minute * 10,
 			DeviceAuthTokenPollingInterval: time.Second * 10,
-			DeviceVerificationURL:          "https://www.test.com",
+			RFC8623UserVerificationURL:     "https://www.test.com",
 			AccessTokenLifespan:            time.Hour,
 			RefreshTokenLifespan:           time.Hour,
 			ScopeStrategy:                  fosite.HierarchicScopeStrategy,
@@ -36,14 +37,12 @@ func Test_HandleDeviceEndpointRequest(t *testing.T) {
 		},
 	}
 
-	req := fosite.NewDeviceAuthorizationRequest()
-	req.SetSession(&DefaultSession{
-		DefaultSession: openid.NewDefaultSession(),
-	})
+	req := fosite.NewDeviceAuthorizeRequest()
+	req.SetSession(openid.NewDefaultSession())
 
-	resp := &fosite.DeviceAuthorizationResponse{Extra: map[string]interface{}{}}
+	resp := &fosite.DeviceAuthorizeResponse{Extra: map[string]interface{}{}}
 
-	err := handler.HandleDeviceAuthorizationEndpointRequest(context.TODO(), req, resp)
+	err := handler.HandleDeviceAuthorizeEndpointRequest(context.TODO(), req, resp)
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, resp.GetDeviceCode())

@@ -11,7 +11,7 @@ import (
 
 // TODO: Do documentation
 
-func (f *Fosite) WriteDeviceAuthorizationResponse(_ context.Context, rw http.ResponseWriter, _ DeviceAuthorizationRequester, responder DeviceResponder) {
+func (f *Fosite) WriteDeviceAuthorizeResponse(_ context.Context, rw http.ResponseWriter, _ DeviceAuthorizeRequester, responder DeviceAuthorizeResponder) {
 	// Set custom headers, e.g. "X-MySuperCoolCustomHeader" or "X-DONT-CACHE-ME"...
 	wh := rw.Header()
 	rh := responder.GetHeader()

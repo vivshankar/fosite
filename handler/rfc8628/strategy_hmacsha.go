@@ -15,9 +15,9 @@ import (
 	enigma "github.com/ory/fosite/token/hmac"
 )
 
-type DefaultDeviceStrategy struct {
-	RFC8628CodeStrategy
+var _ RFC8628CodeStrategy = (*DefaultDeviceStrategy)(nil)
 
+type DefaultDeviceStrategy struct {
 	Enigma *enigma.HMACStrategy
 	Config interface {
 		fosite.DeviceAndUserCodeLifespanProvider

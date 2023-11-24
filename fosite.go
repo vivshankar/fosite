@@ -82,11 +82,11 @@ func (a *PushedAuthorizeEndpointHandlers) Append(h PushedAuthorizeEndpointHandle
 	*a = append(*a, h)
 }
 
-// DeviceAuthorizationEndpointHandlers is a list of DeviceAuthorizationEndpointHandler
-type DeviceAuthorizationEndpointHandlers []DeviceAuthorizationEndpointHandler
+// DeviceAuthorizeEndpointHandlers is a list of DeviceAuthorizeEndpointHandler
+type DeviceAuthorizeEndpointHandlers []DeviceAuthorizeEndpointHandler
 
-// Append adds an DeviceAuthorizationEndpointHandler to this list. Ignores duplicates based on reflect.TypeOf.
-func (a *DeviceAuthorizationEndpointHandlers) Append(h DeviceAuthorizationEndpointHandler) {
+// Append adds an DeviceAuthorizeEndpointHandler to this list. Ignores duplicates based on reflect.TypeOf.
+func (a *DeviceAuthorizeEndpointHandlers) Append(h DeviceAuthorizeEndpointHandler) {
 	for _, this := range *a {
 		if reflect.TypeOf(this) == reflect.TypeOf(h) {
 			return
@@ -96,11 +96,11 @@ func (a *DeviceAuthorizationEndpointHandlers) Append(h DeviceAuthorizationEndpoi
 	*a = append(*a, h)
 }
 
-// DeviceUserVerificationEndpointHandlers is a list of DeviceUserVerificationEndpointHandler
-type DeviceUserVerificationEndpointHandlers []DeviceUserVerificationEndpointHandler
+// RFC8623UserAuthorizeEndpointHandlers is a list of RFC8623UserAuthorizeEndpointHandler
+type RFC8623UserAuthorizeEndpointHandlers []RFC8623UserAuthorizeEndpointHandler
 
-// Append adds an DeviceUserVerificationEndpointHandler to this list. Ignores duplicates based on reflect.TypeOf.
-func (a *DeviceUserVerificationEndpointHandlers) Append(h DeviceUserVerificationEndpointHandler) {
+// Append adds an RFC8623UserAuthorizeEndpointHandler to this list. Ignores duplicates based on reflect.TypeOf.
+func (a *RFC8623UserAuthorizeEndpointHandlers) Append(h RFC8623UserAuthorizeEndpointHandler) {
 	for _, this := range *a {
 		if reflect.TypeOf(this) == reflect.TypeOf(h) {
 			return
@@ -159,9 +159,9 @@ type Configurator interface {
 	TokenIntrospectionHandlersProvider
 	RevocationHandlersProvider
 	UseLegacyErrorFormatProvider
-	DeviceAuthorizationEndpointHandlersProvider
-	DeviceUserVerificationEndpointHandlersProvider
-	DeviceAuthorizationProvider
+	DeviceAuthorizeEndpointHandlersProvider
+	RFC8623UserAuthorizeEndpointHandlersProvider
+	DeviceAuthorizeConfigProvider
 	DeviceAndUserCodeLifespanProvider
 }
 

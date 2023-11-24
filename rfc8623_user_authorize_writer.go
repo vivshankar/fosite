@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-func (f *Fosite) WriteDeviceUserVerificationResponse(_ context.Context, rw http.ResponseWriter, _ DeviceAuthorizationRequester, responder DeviceUserVerificationResponder) {
+func (f *Fosite) WriteRFC8623UserAuthorizeResponse(_ context.Context, rw http.ResponseWriter, _ DeviceAuthorizeRequester, responder RFC8623UserAuthorizeResponder) {
 	wh := rw.Header()
 	rh := responder.GetHeader()
 	for k := range rh {
@@ -29,7 +29,7 @@ func (f *Fosite) WriteDeviceUserVerificationResponse(_ context.Context, rw http.
 	_, _ = rw.Write(js)
 }
 
-func (f *Fosite) WriteDeviceUserVerificationError(ctx context.Context, rw http.ResponseWriter, req DeviceAuthorizationRequester, err error) {
+func (f *Fosite) WriteRFC8623UserAuthorizeError(ctx context.Context, rw http.ResponseWriter, req DeviceAuthorizeRequester, err error) {
 	rw.Header().Set("Cache-Control", "no-store")
 	rw.Header().Set("Pragma", "no-cache")
 	rw.Header().Set("Content-Type", "application/json;charset=UTF-8")

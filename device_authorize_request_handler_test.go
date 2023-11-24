@@ -19,7 +19,7 @@ import (
 	. "github.com/ory/fosite/internal"
 )
 
-func TestNewDeviceRequest(t *testing.T) {
+func TestNewDeviceAuthorizeRequest(t *testing.T) {
 	var store *MockStorage
 	for k, c := range []struct {
 		desc          string
@@ -28,7 +28,7 @@ func TestNewDeviceRequest(t *testing.T) {
 		query         url.Values
 		expectedError error
 		mock          func()
-		expect        *DeviceAuthorizationRequest
+		expect        *DeviceAuthorizeRequest
 	}{
 		/* empty request */
 		{
@@ -88,7 +88,7 @@ func TestNewDeviceRequest(t *testing.T) {
 					GrantTypes: []string{"urn:ietf:params:oauth:grant-type:device_code"},
 				}, nil)
 			},
-			expect: &DeviceAuthorizationRequest{
+			expect: &DeviceAuthorizeRequest{
 				Request: Request{
 					Client: &DefaultClient{
 						Scopes: []string{"foo", "bar"},
@@ -126,7 +126,7 @@ func TestNewDeviceRequest(t *testing.T) {
 			}
 
 			c.conf.Store = store
-			ar, err := c.conf.NewDeviceAuthorizationRequest(context.Background(), c.r)
+			ar, err := c.conf.NewDeviceAuthorizeRequest(context.Background(), c.r)
 			if c.expectedError != nil {
 				assert.EqualError(t, err, c.expectedError.Error())
 			} else {

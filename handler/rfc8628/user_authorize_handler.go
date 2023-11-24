@@ -5,40 +5,36 @@ package rfc8628
 
 import (
 	"context"
+	"time"
+
 	"github.com/ory/fosite"
 	"github.com/ory/x/errorsx"
 	"github.com/pkg/errors"
-	"time"
 )
 
-type DeviceUserVerificationHandler struct {
+type UserAuthorizerHandler struct {
 	Storage  RFC8628CodeStorage
 	Strategy RFC8628CodeStrategy
 	Config   interface {
-		fosite.DeviceAuthorizationProvider
+		fosite.DeviceAuthorizeConfigProvider
 		fosite.DeviceAndUserCodeLifespanProvider
 	}
 }
 
 var (
-	_ fosite.DeviceUserVerificationEndpointHandler = (*DeviceUserVerificationHandler)(nil)
+	_ fosite.RFC8623UserAuthorizeEndpointHandler = (*UserAuthorizerHandler)(nil)
 )
 
-// HandleDeviceUserVerificationEndpointRequest is a response handler for the Device Authorisation Grant as
+// PopulateRFC8623UserAuthorizeEndpointResponse is a response handler for the Device Authorisation Grant as
 // defined in https://tools.ietf.org/html/rfc8628#section-3.1
-func (d *DeviceUserVerificationHandler) HandleDeviceUserVerificationEndpointRequest(ctx context.Context, req fosite.DeviceAuthorizationRequester, resp fosite.DeviceUserVerificationResponder) error {
-	session, _ := req.GetSession().(Session)
-	if session == nil {
-		return errorsx.WithStack(fosite.ErrServerError.WithDebug("Failed to perform device authorization because the session is not of the right type."))
-	}
-
+func (d *UserAuthorizerHandler) PopulateRFC8623UserAuthorizeEndpointResponse(ctx context.Context, req fosite.DeviceAuthorizeRequester, resp fosite.RFC8623UserAuthorizeResponder) error {
 	status := req.GetStatus()
 	// the request shall be either approved or denied
-	if status != fosite.DeviceAuthorizationStatusApproved && status != fosite.DeviceAuthorizationStatusDenied {
+	if status != fosite.DeviceAuthorizeStatusApproved && status != fosite.DeviceAuthorizeStatusDenied {
 		return errorsx.WithStack(fosite.ErrInvalidRequest.WithDebug("Failed to perform device authorization because the request status is invalid."))
 	}
 
-	resp.SetStatus(fosite.DeviceAuthorizationStatusToString(status))
+	resp.SetStatus(fosite.DeviceAuthorizeStatusToString(status))
 
 	// Stores the auth session and approval status into user code session instead of device code session.
 	userCodeSignature := req.GetUserCodeSignature()
@@ -49,7 +45,7 @@ func (d *DeviceUserVerificationHandler) HandleDeviceUserVerificationEndpointRequ
 	return nil
 }
 
-func (d *DeviceUserVerificationHandler) ValidateRequest(ctx context.Context, dur fosite.DeviceAuthorizationRequester) error {
+func (d *UserAuthorizerHandler) HandleRFC8623UserAuthorizeEndpointRequest(ctx context.Context, dur fosite.DeviceAuthorizeRequester) error {
 	userCode := dur.GetRequestForm().Get("user_code")
 	if len(userCode) == 0 {
 		return errorsx.WithStack(fosite.ErrInvalidRequest.WithHint("Cannot process the request, user_code is missing."))
@@ -72,14 +68,11 @@ func (d *DeviceUserVerificationHandler) ValidateRequest(ctx context.Context, dur
 		return errorsx.WithStack(fosite.ErrInvalidGrant.WithHint("The requested OAuth 2.0 Client does not have the 'urn:ietf:params:oauth:grant-type:device_code' grant."))
 	}
 
-	session, _ := dur.GetSession().(Session)
-	if session == nil { // shall not happen?
-		return errorsx.WithStack(fosite.ErrServerError.WithHint("Failed to validate session because the session is not of the right type."))
-	}
+	session := dur.GetSession()
 	if dur.GetUserCodeSignature() != userCodeSig { // shall not happen?
 		return errorsx.WithStack(fosite.ErrInvalidRequest.WithHint("Cannot process the request, user code signature mismatching."))
 	}
-	if session.GetExpiresAt(fosite.UserCode).Before(time.Now().UTC()) || dur.GetStatus() != fosite.DeviceAuthorizationStatusNew {
+	if session.GetExpiresAt(fosite.UserCode).Before(time.Now().UTC()) || dur.GetStatus() != fosite.DeviceAuthorizeStatusNew {
 		return errorsx.WithStack(fosite.ErrInvalidGrant.WithHint("Cannot process the request, the user_code is either invalid or expired."))
 	}
 

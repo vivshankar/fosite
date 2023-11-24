@@ -269,17 +269,17 @@ type RevocationHandlersProvider interface {
 	GetRevocationHandlers(ctx context.Context) RevocationHandlers
 }
 
-// DeviceAuthorizationEndpointHandlersProvider returns the provider for setting up the Device authorization handlers.
-type DeviceAuthorizationEndpointHandlersProvider interface {
-	// GetDeviceAuthorizationEndpointHandlers returns the handlers.
-	GetDeviceAuthorizationEndpointHandlers(ctx context.Context) DeviceAuthorizationEndpointHandlers
+// DeviceAuthorizeEndpointHandlersProvider returns the provider for setting up the Device authorization handlers.
+type DeviceAuthorizeEndpointHandlersProvider interface {
+	// GetDeviceAuthorizeEndpointHandlers returns the handlers.
+	GetDeviceAuthorizeEndpointHandlers(ctx context.Context) DeviceAuthorizeEndpointHandlers
 }
 
-// DeviceUserVerificationEndpointHandlersProvider returns the provider for setting up the Device grant user interaction handlers.
-type DeviceUserVerificationEndpointHandlersProvider interface {
+// RFC8623UserAuthorizeEndpointHandlersProvider returns the provider for setting up the Device grant user interaction handlers.
+type RFC8623UserAuthorizeEndpointHandlersProvider interface {
 
-	// GetDeviceUserVerificationEndpointHandlers returns the handlers.
-	GetDeviceUserVerificationEndpointHandlers(ctx context.Context) DeviceUserVerificationEndpointHandlers
+	// GetRFC8623UserAuthorizeEndpointHandlers returns the handlers.
+	GetRFC8623UserAuthorizeEndpointHandlers(ctx context.Context) RFC8623UserAuthorizeEndpointHandlers
 }
 
 // DeviceAndUserCodeLifespanProvider returns the provider for configuring the device and user code lifespan.
@@ -288,10 +288,10 @@ type DeviceAndUserCodeLifespanProvider interface {
 	GetDeviceAndUserCodeLifespan(ctx context.Context) time.Duration
 }
 
-// DeviceAuthorizationProvider returns the provider for configuring the device authorization response
+// DeviceAuthorizeConfigProvider returns the provider for configuring the device authorization response
 // (see https://www.rfc-editor.org/rfc/rfc8628#section-3.2)
-type DeviceAuthorizationProvider interface {
-	GetDeviceVerificationURL(ctx context.Context) string
+type DeviceAuthorizeConfigProvider interface {
+	GetRFC8623UserVerificationURL(ctx context.Context) string
 	GetDeviceAuthTokenPollingInterval(ctx context.Context) time.Duration
 }
 

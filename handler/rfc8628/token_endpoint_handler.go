@@ -5,10 +5,11 @@ package rfc8628
 
 import (
 	"context"
+	"time"
+
 	"github.com/ory/fosite"
 	"github.com/ory/fosite/handler/oauth2"
 	"github.com/ory/x/errorsx"
-	"time"
 )
 
 // DeviceCodeTokenHandler is a response handler for the Device Code introduced in the Device Authorize Grant
@@ -17,18 +18,17 @@ type DeviceCodeTokenHandler struct {
 	Storage  RFC8628CodeStorage
 	Strategy RFC8628CodeStrategy
 	Config   interface {
-		fosite.DeviceAuthorizationProvider
+		fosite.DeviceAuthorizeConfigProvider
 		fosite.DeviceAndUserCodeLifespanProvider
 	}
 }
 
-type DeviceAuthorizationTokenEndpointHandler struct {
+type DeviceAuthorizeTokenEndpointHandler struct {
 	oauth2.GenericCodeTokenEndpointHandler
 }
 
 var _ oauth2.CodeTokenEndpointHandler = (*DeviceCodeTokenHandler)(nil)
-
-var _ fosite.TokenEndpointHandler = (*DeviceAuthorizationTokenEndpointHandler)(nil)
+var _ fosite.TokenEndpointHandler = (*DeviceAuthorizeTokenEndpointHandler)(nil)
 
 func (c *DeviceCodeTokenHandler) ValidateGrantTypes(_ context.Context, requester fosite.AccessRequester) error {
 	if !requester.GetClient().GetGrantTypes().Has(string(fosite.GrantTypeDeviceCode)) {
@@ -82,7 +82,7 @@ func (c *DeviceCodeTokenHandler) GetCodeAndSession(ctx context.Context, requeste
 		return code, signature, deviceAuthReq, err
 	}
 
-	if userAuthReq.GetStatus() == fosite.DeviceAuthorizationStatusNew {
+	if userAuthReq.GetStatus() == fosite.DeviceAuthorizeStatusNew {
 		_ = c.UpdateLastChecked(ctx, requester, deviceAuthReq)
 		return "", "", nil, errorsx.WithStack(fosite.ErrAuthorizationPending.WithHintf("The user has not authorized the request."))
 	}
@@ -92,7 +92,7 @@ func (c *DeviceCodeTokenHandler) GetCodeAndSession(ctx context.Context, requeste
 	requester.SetSession(deviceAuthReq.GetSession())
 	requester.SetID(deviceAuthReq.GetID())
 
-	if userAuthReq.GetStatus() != fosite.DeviceAuthorizationStatusApproved {
+	if userAuthReq.GetStatus() != fosite.DeviceAuthorizeStatusApproved {
 		return "", "", nil, errorsx.WithStack(fosite.ErrAccessDenied.WithHintf("The user has denied the request."))
 	}
 
@@ -100,11 +100,7 @@ func (c *DeviceCodeTokenHandler) GetCodeAndSession(ctx context.Context, requeste
 }
 
 func (c *DeviceCodeTokenHandler) UpdateLastChecked(ctx context.Context, request fosite.AccessRequester, authorizeRequest fosite.Requester) error {
-	session, _ := authorizeRequest.GetSession().(Session)
-	if session == nil {
-		return errorsx.WithStack(fosite.ErrServerError.WithDebug("Failed to perform device authorization because the session is not of the right type."))
-	}
-	authReq, ok := authorizeRequest.(fosite.DeviceAuthorizationRequester)
+	authReq, ok := authorizeRequest.(fosite.DeviceAuthorizeRequester)
 	if !ok {
 		return errorsx.WithStack(fosite.ErrServerError.WithDebug("Failed to perform device authorization because the authorizeRequest is not of the right type."))
 	}
@@ -120,7 +116,7 @@ func (c *DeviceCodeTokenHandler) InvalidateSession(ctx context.Context, signatur
 	if err := c.Storage.InvalidateDeviceCodeSession(ctx, signature); err != nil {
 		return err
 	}
-	if authReq, ok := authorizeRequest.(fosite.DeviceAuthorizationRequester); ok {
+	if authReq, ok := authorizeRequest.(fosite.DeviceAuthorizeRequester); ok {
 		return c.Storage.InvalidateUserCodeSession(ctx, authReq.GetUserCodeSignature())
 	}
 

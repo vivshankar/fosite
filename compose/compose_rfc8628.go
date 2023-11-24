@@ -11,7 +11,7 @@ import (
 
 // RFC8628DeviceAuthorizationFactory creates an OAuth2 device grant authorization handler.
 func RFC8628DeviceAuthorizationFactory(config fosite.Configurator, storage interface{}, strategy interface{}) interface{} {
-	return &rfc8628.DeviceAuthorizationHandler{
+	return &rfc8628.DeviceAuthorizeHandler{
 		Strategy: strategy.(rfc8628.RFC8628CodeStrategy),
 		Storage:  storage.(rfc8628.RFC8628CodeStorage),
 		Config:   config,
@@ -20,7 +20,7 @@ func RFC8628DeviceAuthorizationFactory(config fosite.Configurator, storage inter
 
 // RFC8628DeviceUserVerificationFactory creates an OAuth2 device grant user interaction handler.
 func RFC8628DeviceUserVerificationFactory(config fosite.Configurator, storage interface{}, strategy interface{}) interface{} {
-	return &rfc8628.DeviceUserVerificationHandler{
+	return &rfc8628.UserAuthorizerHandler{
 		Strategy: strategy.(rfc8628.RFC8628CodeStrategy),
 		Storage:  storage.(rfc8628.RFC8628CodeStorage),
 		Config:   config,
@@ -30,7 +30,7 @@ func RFC8628DeviceUserVerificationFactory(config fosite.Configurator, storage in
 // RFC8628DeviceAuthorizationTokenFactory creates an OAuth2 device authorization grant ("device authorization flow") handler and registers
 // an access token, refresh token and authorize code validator.
 func RFC8628DeviceAuthorizationTokenFactory(config fosite.Configurator, storage interface{}, strategy interface{}) interface{} {
-	return &rfc8628.DeviceAuthorizationTokenEndpointHandler{
+	return &rfc8628.DeviceAuthorizeTokenEndpointHandler{
 		GenericCodeTokenEndpointHandler: oauth2.GenericCodeTokenEndpointHandler{
 			CodeTokenEndpointHandler: &rfc8628.DeviceCodeTokenHandler{
 				Strategy: strategy.(rfc8628.RFC8628CodeStrategy),

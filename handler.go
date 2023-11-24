@@ -67,25 +67,25 @@ type PushedAuthorizeEndpointHandler interface {
 	HandlePushedAuthorizeEndpointRequest(ctx context.Context, requester AuthorizeRequester, responder PushedAuthorizeResponder) error
 }
 
-type DeviceAuthorizationEndpointHandler interface {
-	// HandleDeviceAuthorizationEndpointRequest handles a device authorize endpoint request. To extend the handler's capabilities, the http request
+type DeviceAuthorizeEndpointHandler interface {
+	// HandleDeviceAuthorizeEndpointRequest handles a device authorize endpoint request. To extend the handler's capabilities, the http request
 	// is passed along, if further information retrieval is required. If the handler feels that he is not responsible for
 	// the device authorize request, he must return nil and NOT modify session nor responder neither requester.
 	//
 	// The following spec is a good example of what HandleDeviceAuthorizeRequest should do.
 	// * https://tools.ietf.org/html/rfc8628#section-3.2
-	HandleDeviceAuthorizationEndpointRequest(ctx context.Context, requester DeviceAuthorizationRequester, responder DeviceResponder) error
+	HandleDeviceAuthorizeEndpointRequest(ctx context.Context, requester DeviceAuthorizeRequester, responder DeviceAuthorizeResponder) error
 }
 
-type DeviceUserVerificationEndpointHandler interface {
-	// HandleDeviceUserVerificationEndpointRequest handles a device grant user interaction endpoint request. To extend the handler's capabilities, the http request
-	// is passed along, if further information retrieval is required. If the handler feels that he is not responsible for
-	// the device authorize request, he must return nil and NOT modify session nor responder neither requester.
+type RFC8623UserAuthorizeEndpointHandler interface {
+	// HandleRFC8623UserAuthorizeEndpointRequest validates the request with the given user code.
 	//
-	// The following spec is a good example of what HandleDeviceVerificationEndpointRequest should do.
+	// The following spec is a good example of what PopulateRFC8623UserAuthorizeEndpointResponse should do.
 	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.3
-	HandleDeviceUserVerificationEndpointRequest(ctx context.Context, requester DeviceAuthorizationRequester, responder DeviceUserVerificationResponder) error
+	HandleRFC8623UserAuthorizeEndpointRequest(ctx context.Context, request DeviceAuthorizeRequester) error
 
-	// ValidateRequest validates the request with the given user code
-	ValidateRequest(ctx context.Context, request DeviceAuthorizationRequester) error
+	// PopulateRFC8623UserAuthorizeEndpointResponse populates the response object as an outcome of user authorization during
+	// the device authorization grant flow.
+	//
+	PopulateRFC8623UserAuthorizeEndpointResponse(ctx context.Context, requester DeviceAuthorizeRequester, responder RFC8623UserAuthorizeResponder) error
 }

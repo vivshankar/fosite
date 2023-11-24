@@ -19,12 +19,12 @@ func TestWriteDeviceAuthorizeResponse(t *testing.T) {
 	oauth2 := &Fosite{Config: &Config{
 		DeviceAndUserCodeLifespan:      time.Minute,
 		DeviceAuthTokenPollingInterval: time.Minute,
-		DeviceVerificationURL:          "http://ory.sh",
+		RFC8623UserVerificationURL:     "http://ory.sh",
 	}}
 
 	rw := httptest.NewRecorder()
-	ar := &DeviceAuthorizationRequest{}
-	resp := &DeviceAuthorizationResponse{Extra: map[string]interface{}{}}
+	ar := &DeviceAuthorizeRequest{}
+	resp := &DeviceAuthorizeResponse{Extra: map[string]interface{}{}}
 	resp.SetUserCode("AAAA")
 	resp.SetDeviceCode("BBBB")
 	resp.SetInterval(int(
@@ -33,16 +33,16 @@ func TestWriteDeviceAuthorizeResponse(t *testing.T) {
 	resp.SetExpiresIn(int64(
 		time.Now().Round(time.Second).Add(oauth2.Config.GetDeviceAndUserCodeLifespan(context.TODO())).Second(),
 	))
-	resp.SetVerificationURI(oauth2.Config.GetDeviceVerificationURL(context.TODO()))
+	resp.SetVerificationURI(oauth2.Config.GetRFC8623UserVerificationURL(context.TODO()))
 	resp.SetVerificationURIComplete(
-		oauth2.Config.GetDeviceVerificationURL(context.TODO()) + "?user_code=" + resp.GetUserCode(),
+		oauth2.Config.GetRFC8623UserVerificationURL(context.TODO()) + "?user_code=" + resp.GetUserCode(),
 	)
 
-	oauth2.WriteDeviceAuthorizationResponse(context.Background(), rw, ar, resp)
+	oauth2.WriteDeviceAuthorizeResponse(context.Background(), rw, ar, resp)
 
 	assert.Equal(t, 200, rw.Code)
 
-	wroteDeviceResponse := DeviceAuthorizationResponse{Extra: map[string]interface{}{}}
+	wroteDeviceResponse := DeviceAuthorizeResponse{Extra: map[string]interface{}{}}
 	err := wroteDeviceResponse.FromJson(rw.Body)
 	require.NoError(t, err)
 

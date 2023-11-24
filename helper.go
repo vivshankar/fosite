@@ -44,13 +44,13 @@ func EscapeJSONString(str string) string {
 	return str
 }
 
-func DeviceAuthorizationStatusToString(status DeviceAuthorizationStatus) string {
+func DeviceAuthorizeStatusToString(status DeviceAuthorizeStatus) string {
 	switch status {
-	case DeviceAuthorizationStatusApproved:
+	case DeviceAuthorizeStatusApproved:
 		return "Approved"
-	case DeviceAuthorizationStatusDenied:
+	case DeviceAuthorizeStatusDenied:
 		return "Denied"
-	case DeviceAuthorizationStatusNew:
+	case DeviceAuthorizeStatusNew:
 		return "New"
 	default:
 		return "Invalid"
