@@ -53,7 +53,16 @@ func (c *GenericCodeTokenEndpointHandler) HandleTokenEndpointRequest(ctx context
 	}
 
 	code, _, authorizeRequest, err := c.GetCodeAndSession(ctx, request)
-	if errors.Is(err, fosite.ErrInvalidatedAuthorizeCode) || errors.Is(err, fosite.ErrInvalidatedDeviceCode) {
+	if errors.Is(err, fosite.ErrInvalidatedDeviceCode) {
+		if authorizeRequest == nil {
+			return fosite.ErrServerError.
+				WithHint("Misconfigured code lead to an error that prohibited the OAuth 2.0 Framework from processing this request.").
+				WithDebug(`getCodeSession must return a value for "fosite.Requester" when returning "ErrInvalidatedAuthorizeCode" or "ErrInvalidatedDeviceCode".`)
+		}
+
+		hint := "The authorization code has already been used."
+		return errorsx.WithStack(fosite.ErrInvalidGrant.WithHint(hint))
+	} else if errors.Is(err, fosite.ErrInvalidatedAuthorizeCode) {
 		if authorizeRequest == nil {
 			return fosite.ErrServerError.
 				WithHint("Misconfigured code lead to an error that prohibited the OAuth 2.0 Framework from processing this request.").
