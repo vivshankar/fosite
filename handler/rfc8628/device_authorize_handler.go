@@ -13,7 +13,6 @@ type DeviceAuthorizeHandler struct {
 	Strategy RFC8628CodeStrategy
 	Config   interface {
 		fosite.DeviceAuthorizeConfigProvider
-		fosite.DeviceAndUserCodeLifespanProvider
 	}
 }
 

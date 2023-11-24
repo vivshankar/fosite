@@ -64,7 +64,6 @@ var (
 	_ PushedAuthorizeRequestConfigProvider         = (*Config)(nil)
 	_ DeviceAuthorizeEndpointHandlersProvider      = (*Config)(nil)
 	_ RFC8623UserAuthorizeEndpointHandlersProvider = (*Config)(nil)
-	_ DeviceAndUserCodeLifespanProvider            = (*Config)(nil)
 	_ DeviceAuthorizeConfigProvider                = (*Config)(nil)
 )
 

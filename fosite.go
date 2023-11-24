@@ -162,7 +162,6 @@ type Configurator interface {
 	DeviceAuthorizeEndpointHandlersProvider
 	RFC8623UserAuthorizeEndpointHandlersProvider
 	DeviceAuthorizeConfigProvider
-	DeviceAndUserCodeLifespanProvider
 }
 
 func NewOAuth2Provider(s Storage, c Configurator) *Fosite {

@@ -282,15 +282,11 @@ type RFC8623UserAuthorizeEndpointHandlersProvider interface {
 	GetRFC8623UserAuthorizeEndpointHandlers(ctx context.Context) RFC8623UserAuthorizeEndpointHandlers
 }
 
-// DeviceAndUserCodeLifespanProvider returns the provider for configuring the device and user code lifespan.
-type DeviceAndUserCodeLifespanProvider interface {
-	// GetDeviceAndUserCodeLifespan returns the device and user code lifespan.
-	GetDeviceAndUserCodeLifespan(ctx context.Context) time.Duration
-}
-
 // DeviceAuthorizeConfigProvider returns the provider for configuring the device authorization response
 // (see https://www.rfc-editor.org/rfc/rfc8628#section-3.2)
 type DeviceAuthorizeConfigProvider interface {
+	// GetDeviceAndUserCodeLifespan returns the device and user code lifespan.
+	GetDeviceAndUserCodeLifespan(ctx context.Context) time.Duration
 	GetRFC8623UserVerificationURL(ctx context.Context) string
 	GetDeviceAuthTokenPollingInterval(ctx context.Context) time.Duration
 }

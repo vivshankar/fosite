@@ -20,7 +20,7 @@ var _ RFC8628CodeStrategy = (*DefaultDeviceStrategy)(nil)
 type DefaultDeviceStrategy struct {
 	Enigma *enigma.HMACStrategy
 	Config interface {
-		fosite.DeviceAndUserCodeLifespanProvider
+		fosite.DeviceAuthorizeConfigProvider
 	}
 }
 

@@ -5,6 +5,7 @@ package compose
 
 import (
 	"context"
+
 	"github.com/ory/fosite/handler/rfc8628"
 
 	"github.com/ory/fosite"
@@ -29,7 +30,7 @@ type HMACSHAStrategyConfigurator interface {
 	fosite.GlobalSecretProvider
 	fosite.RotatedGlobalSecretsProvider
 	fosite.HMACHashingProvider
-	fosite.DeviceAndUserCodeLifespanProvider
+	fosite.DeviceAuthorizeConfigProvider
 }
 
 func NewOAuth2HMACStrategy(config HMACSHAStrategyConfigurator) *oauth2.HMACSHAStrategy {

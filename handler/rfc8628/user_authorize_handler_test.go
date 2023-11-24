@@ -25,7 +25,6 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *te
 		Strategy RFC8628CodeStrategy
 		Config   interface {
 			fosite.DeviceAuthorizeConfigProvider
-			fosite.DeviceAndUserCodeLifespanProvider
 		}
 	}
 	type args struct {
@@ -208,7 +207,6 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse_Handl
 		Strategy RFC8628CodeStrategy
 		Config   interface {
 			fosite.DeviceAuthorizeConfigProvider
-			fosite.DeviceAndUserCodeLifespanProvider
 		}
 	}
 	type args struct {
