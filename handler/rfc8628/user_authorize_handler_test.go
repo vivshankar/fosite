@@ -19,7 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestUserAuthorizerHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *testing.T) {
+func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *testing.T) {
 	type fields struct {
 		Storage  RFC8628CodeStorage
 		Strategy RFC8628CodeStrategy
@@ -182,7 +182,7 @@ func TestUserAuthorizerHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *t
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d := &UserAuthorizerHandler{
+			d := &UserAuthorizeHandler{
 				Storage:  tt.fields.Storage,
 				Strategy: tt.fields.Strategy,
 				Config:   tt.fields.Config,
@@ -202,7 +202,7 @@ func TestUserAuthorizerHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *t
 	}
 }
 
-func TestUserAuthorizerHandler_PopulateRFC8623UserAuthorizeEndpointResponse_HandleRFC8623UserAuthorizeEndpointRequest(t *testing.T) {
+func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse_HandleRFC8623UserAuthorizeEndpointRequest(t *testing.T) {
 	type fields struct {
 		Storage  RFC8628CodeStorage
 		Strategy RFC8628CodeStrategy
@@ -450,7 +450,7 @@ func TestUserAuthorizerHandler_PopulateRFC8623UserAuthorizeEndpointResponse_Hand
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d := &UserAuthorizerHandler{
+			d := &UserAuthorizeHandler{
 				Storage:  tt.fields.Storage,
 				Strategy: tt.fields.Strategy,
 				Config:   tt.fields.Config,

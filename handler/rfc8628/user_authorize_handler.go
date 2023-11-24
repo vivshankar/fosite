@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type UserAuthorizerHandler struct {
+type UserAuthorizeHandler struct {
 	Storage  RFC8628CodeStorage
 	Strategy RFC8628CodeStrategy
 	Config   interface {
@@ -22,12 +22,12 @@ type UserAuthorizerHandler struct {
 }
 
 var (
-	_ fosite.RFC8623UserAuthorizeEndpointHandler = (*UserAuthorizerHandler)(nil)
+	_ fosite.RFC8623UserAuthorizeEndpointHandler = (*UserAuthorizeHandler)(nil)
 )
 
 // PopulateRFC8623UserAuthorizeEndpointResponse is a response handler for the Device Authorisation Grant as
 // defined in https://tools.ietf.org/html/rfc8628#section-3.1
-func (d *UserAuthorizerHandler) PopulateRFC8623UserAuthorizeEndpointResponse(ctx context.Context, req fosite.DeviceAuthorizeRequester, resp fosite.RFC8623UserAuthorizeResponder) error {
+func (d *UserAuthorizeHandler) PopulateRFC8623UserAuthorizeEndpointResponse(ctx context.Context, req fosite.DeviceAuthorizeRequester, resp fosite.RFC8623UserAuthorizeResponder) error {
 	status := req.GetStatus()
 	// the request shall be either approved or denied
 	if status != fosite.DeviceAuthorizeStatusApproved && status != fosite.DeviceAuthorizeStatusDenied {
@@ -45,7 +45,7 @@ func (d *UserAuthorizerHandler) PopulateRFC8623UserAuthorizeEndpointResponse(ctx
 	return nil
 }
 
-func (d *UserAuthorizerHandler) HandleRFC8623UserAuthorizeEndpointRequest(ctx context.Context, dur fosite.DeviceAuthorizeRequester) error {
+func (d *UserAuthorizeHandler) HandleRFC8623UserAuthorizeEndpointRequest(ctx context.Context, dur fosite.DeviceAuthorizeRequester) error {
 	userCode := dur.GetRequestForm().Get("user_code")
 	if len(userCode) == 0 {
 		return errorsx.WithStack(fosite.ErrInvalidRequest.WithHint("Cannot process the request, user_code is missing."))

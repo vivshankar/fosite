@@ -9,8 +9,8 @@ import (
 	"github.com/ory/fosite/handler/rfc8628"
 )
 
-// RFC8628DeviceAuthorizationFactory creates an OAuth2 device grant authorization handler.
-func RFC8628DeviceAuthorizationFactory(config fosite.Configurator, storage interface{}, strategy interface{}) interface{} {
+// RFC8628DeviceAuthorizeFactory creates an OAuth2 device grant authorization handler.
+func RFC8628DeviceAuthorizeFactory(config fosite.Configurator, storage interface{}, strategy interface{}) interface{} {
 	return &rfc8628.DeviceAuthorizeHandler{
 		Strategy: strategy.(rfc8628.RFC8628CodeStrategy),
 		Storage:  storage.(rfc8628.RFC8628CodeStorage),
@@ -18,18 +18,18 @@ func RFC8628DeviceAuthorizationFactory(config fosite.Configurator, storage inter
 	}
 }
 
-// RFC8628DeviceUserVerificationFactory creates an OAuth2 device grant user interaction handler.
-func RFC8628DeviceUserVerificationFactory(config fosite.Configurator, storage interface{}, strategy interface{}) interface{} {
-	return &rfc8628.UserAuthorizerHandler{
+// RFC8628UserAuthorizeFactory creates an OAuth2 device grant user interaction handler.
+func RFC8628UserAuthorizeFactory(config fosite.Configurator, storage interface{}, strategy interface{}) interface{} {
+	return &rfc8628.UserAuthorizeHandler{
 		Strategy: strategy.(rfc8628.RFC8628CodeStrategy),
 		Storage:  storage.(rfc8628.RFC8628CodeStorage),
 		Config:   config,
 	}
 }
 
-// RFC8628DeviceAuthorizationTokenFactory creates an OAuth2 device authorization grant ("device authorization flow") handler and registers
+// RFC8628DeviceAuthorizeTokenFactory creates an OAuth2 device authorization grant ("device authorization flow") handler and registers
 // an access token, refresh token and authorize code validator.
-func RFC8628DeviceAuthorizationTokenFactory(config fosite.Configurator, storage interface{}, strategy interface{}) interface{} {
+func RFC8628DeviceAuthorizeTokenFactory(config fosite.Configurator, storage interface{}, strategy interface{}) interface{} {
 	return &rfc8628.DeviceAuthorizeTokenEndpointHandler{
 		GenericCodeTokenEndpointHandler: oauth2.GenericCodeTokenEndpointHandler{
 			CodeTokenEndpointHandler: &rfc8628.DeviceCodeTokenHandler{
