@@ -73,8 +73,7 @@ func (d *DeviceAuthorizeRequest) GetLastChecked() time.Time {
 func (d *DeviceAuthorizeRequest) Merge(requester Requester) {
 	d.Request.Merge(requester)
 
-	authReq, ok := requester.(*DeviceAuthorizeRequest)
-	if ok {
+	if authReq, ok := requester.(*DeviceAuthorizeRequest); ok {
 		d.Status = authReq.Status
 		d.DeviceCodeSignature = authReq.DeviceCodeSignature
 		d.UserCodeSignature = authReq.UserCodeSignature
