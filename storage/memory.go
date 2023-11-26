@@ -41,12 +41,16 @@ type MemoryStore struct {
 	IDSessions      map[string]fosite.Requester
 	AccessTokens    map[string]fosite.Requester
 	RefreshTokens   map[string]StoreRefreshToken
+	DeviceCodes     map[string]fosite.Requester
+	UserCodes       map[string]fosite.Requester
 	PKCES           map[string]fosite.Requester
 	Users           map[string]MemoryUserRelation
 	BlacklistedJTIs map[string]time.Time
 	// In-memory request ID to token signatures
 	AccessTokenRequestIDs  map[string]string
 	RefreshTokenRequestIDs map[string]string
+	DeviceCodesRequestIDs  map[string]string
+	UserCodesRequestIDs    map[string]string
 	// Public keys to check signature in auth grant jwt assertion.
 	IssuerPublicKeys map[string]IssuerPublicKeys
 	PARSessions      map[string]fosite.AuthorizeRequester
@@ -56,11 +60,15 @@ type MemoryStore struct {
 	idSessionsMutex             sync.RWMutex
 	accessTokensMutex           sync.RWMutex
 	refreshTokensMutex          sync.RWMutex
+	userCodesMutex              sync.RWMutex
+	deviceCodesMutex            sync.RWMutex
 	pkcesMutex                  sync.RWMutex
 	usersMutex                  sync.RWMutex
 	blacklistedJTIsMutex        sync.RWMutex
 	accessTokenRequestIDsMutex  sync.RWMutex
 	refreshTokenRequestIDsMutex sync.RWMutex
+	userCodesRequestIDsMutex    sync.RWMutex
+	deviceCodesRequestIDsMutex  sync.RWMutex
 	issuerPublicKeysMutex       sync.RWMutex
 	parSessionsMutex            sync.RWMutex
 }
@@ -72,10 +80,14 @@ func NewMemoryStore() *MemoryStore {
 		IDSessions:             make(map[string]fosite.Requester),
 		AccessTokens:           make(map[string]fosite.Requester),
 		RefreshTokens:          make(map[string]StoreRefreshToken),
+		DeviceCodes:            make(map[string]fosite.Requester),
+		UserCodes:              make(map[string]fosite.Requester),
 		PKCES:                  make(map[string]fosite.Requester),
 		Users:                  make(map[string]MemoryUserRelation),
 		AccessTokenRequestIDs:  make(map[string]string),
 		RefreshTokenRequestIDs: make(map[string]string),
+		DeviceCodesRequestIDs:  make(map[string]string),
+		UserCodesRequestIDs:    make(map[string]string),
 		BlacklistedJTIs:        make(map[string]time.Time),
 		IssuerPublicKeys:       make(map[string]IssuerPublicKeys),
 		PARSessions:            make(map[string]fosite.AuthorizeRequester),
@@ -139,9 +151,13 @@ func NewExampleStore() *MemoryStore {
 		AccessTokens:           map[string]fosite.Requester{},
 		RefreshTokens:          map[string]StoreRefreshToken{},
 		PKCES:                  map[string]fosite.Requester{},
+		DeviceCodes:            make(map[string]fosite.Requester),
+		UserCodes:              make(map[string]fosite.Requester),
 		AccessTokenRequestIDs:  map[string]string{},
 		BlacklistedJTIs:        map[string]time.Time{},
 		RefreshTokenRequestIDs: map[string]string{},
+		DeviceCodesRequestIDs:  make(map[string]string),
+		UserCodesRequestIDs:    make(map[string]string),
 		IssuerPublicKeys:       map[string]IssuerPublicKeys{},
 		PARSessions:            map[string]fosite.AuthorizeRequester{},
 	}
@@ -514,4 +530,96 @@ func (s *MemoryStore) GetSubjectForTokenExchange(ctx context.Context, requester 
 	}
 
 	return sub, nil
+}
+
+func (s *MemoryStore) CreateDeviceCodeSession(ctx context.Context, signature string, request fosite.DeviceAuthorizeRequester) error {
+	// We first lock accessTokenRequestIDsMutex and then accessTokensMutex because this is the same order
+	// locking happens in RevokeAccessToken and using the same order prevents deadlocks.
+	s.deviceCodesRequestIDsMutex.Lock()
+	defer s.deviceCodesRequestIDsMutex.Unlock()
+	s.deviceCodesMutex.Lock()
+	defer s.deviceCodesMutex.Unlock()
+
+	s.DeviceCodes[signature] = request
+	s.DeviceCodesRequestIDs[request.GetID()] = signature
+	return nil
+}
+
+func (s *MemoryStore) UpdateDeviceCodeSession(ctx context.Context, signature string, request fosite.DeviceAuthorizeRequester) error {
+	s.deviceCodesRequestIDsMutex.Lock()
+	defer s.deviceCodesRequestIDsMutex.Unlock()
+	s.deviceCodesMutex.Lock()
+	defer s.deviceCodesMutex.Unlock()
+
+	// Only update if exist
+	if _, exists := s.DeviceCodes[signature]; exists {
+		s.DeviceCodes[signature] = request
+		s.DeviceCodesRequestIDs[request.GetID()] = signature
+	}
+	return nil
+}
+
+func (s *MemoryStore) GetDeviceCodeSession(ctx context.Context, signature string, session fosite.Session) (fosite.DeviceAuthorizeRequester, error) {
+	s.deviceCodesMutex.RLock()
+	defer s.deviceCodesMutex.RUnlock()
+
+	rel, ok := s.DeviceCodes[signature].(fosite.DeviceAuthorizeRequester)
+	if !ok {
+		return nil, fosite.ErrNotFound
+	}
+	return rel, nil
+}
+
+func (s *MemoryStore) InvalidateDeviceCodeSession(_ context.Context, code string) error {
+	s.deviceCodesMutex.Lock()
+	defer s.deviceCodesMutex.Unlock()
+
+	delete(s.DeviceCodes, code)
+	return nil
+}
+
+func (s *MemoryStore) CreateUserCodeSession(ctx context.Context, signature string, request fosite.DeviceAuthorizeRequester) error {
+	// We first lock accessTokenRequestIDsMutex and then accessTokensMutex because this is the same order
+	// locking happens in RevokeAccessToken and using the same order prevents deadlocks.
+	s.accessTokenRequestIDsMutex.Lock()
+	defer s.accessTokenRequestIDsMutex.Unlock()
+	s.accessTokensMutex.Lock()
+	defer s.accessTokensMutex.Unlock()
+
+	s.AccessTokens[signature] = request
+	s.AccessTokenRequestIDs[request.GetID()] = signature
+	return nil
+}
+
+func (s *MemoryStore) GetUserCodeSession(ctx context.Context, signature string, session fosite.Session) (fosite.DeviceAuthorizeRequester, error) {
+	s.accessTokensMutex.RLock()
+	defer s.accessTokensMutex.RUnlock()
+
+	rel, ok := s.AccessTokens[signature].(fosite.DeviceAuthorizeRequester)
+	if !ok {
+		return nil, fosite.ErrNotFound
+	}
+	return rel, nil
+}
+
+func (s *MemoryStore) InvalidateUserCodeSession(_ context.Context, code string) error {
+	s.userCodesMutex.Lock()
+	defer s.userCodesMutex.Unlock()
+
+	delete(s.UserCodes, code)
+	return nil
+}
+
+func (s *MemoryStore) UpdateUserCodeSession(ctx context.Context, signature string, req fosite.DeviceAuthorizeRequester) error {
+	s.accessTokenRequestIDsMutex.Lock()
+	defer s.accessTokenRequestIDsMutex.Unlock()
+	s.accessTokensMutex.Lock()
+	defer s.accessTokensMutex.Unlock()
+
+	// Only update if exist
+	if _, exists := s.AccessTokens[signature]; exists {
+		s.AccessTokens[signature] = req
+		s.AccessTokenRequestIDs[req.GetID()] = signature
+	}
+	return nil
 }

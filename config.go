@@ -269,6 +269,28 @@ type RevocationHandlersProvider interface {
 	GetRevocationHandlers(ctx context.Context) RevocationHandlers
 }
 
+// DeviceAuthorizeEndpointHandlersProvider returns the provider for setting up the Device authorization handlers.
+type DeviceAuthorizeEndpointHandlersProvider interface {
+	// GetDeviceAuthorizeEndpointHandlers returns the handlers.
+	GetDeviceAuthorizeEndpointHandlers(ctx context.Context) DeviceAuthorizeEndpointHandlers
+}
+
+// RFC8628UserAuthorizeEndpointHandlersProvider returns the provider for setting up the Device grant user interaction handlers.
+type RFC8628UserAuthorizeEndpointHandlersProvider interface {
+
+	// GetRFC8628UserAuthorizeEndpointHandlers returns the handlers.
+	GetRFC8628UserAuthorizeEndpointHandlers(ctx context.Context) RFC8628UserAuthorizeEndpointHandlers
+}
+
+// DeviceAuthorizeConfigProvider returns the provider for configuring the device authorization response
+// (see https://www.rfc-editor.org/rfc/rfc8628#section-3.2)
+type DeviceAuthorizeConfigProvider interface {
+	// GetDeviceAndUserCodeLifespan returns the device and user code lifespan.
+	GetDeviceAndUserCodeLifespan(ctx context.Context) time.Duration
+	GetRFC8628UserVerificationURL(ctx context.Context) string
+	GetDeviceAuthTokenPollingInterval(ctx context.Context) time.Duration
+}
+
 // PushedAuthorizeEndpointHandlersProvider returns the provider for configuring the PAR handlers.
 type PushedAuthorizeRequestHandlersProvider interface {
 	// GetPushedAuthorizeEndpointHandlers returns the handlers.

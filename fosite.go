@@ -82,6 +82,34 @@ func (a *PushedAuthorizeEndpointHandlers) Append(h PushedAuthorizeEndpointHandle
 	*a = append(*a, h)
 }
 
+// DeviceAuthorizeEndpointHandlers is a list of DeviceAuthorizeEndpointHandler
+type DeviceAuthorizeEndpointHandlers []DeviceAuthorizeEndpointHandler
+
+// Append adds an DeviceAuthorizeEndpointHandler to this list. Ignores duplicates based on reflect.TypeOf.
+func (a *DeviceAuthorizeEndpointHandlers) Append(h DeviceAuthorizeEndpointHandler) {
+	for _, this := range *a {
+		if reflect.TypeOf(this) == reflect.TypeOf(h) {
+			return
+		}
+	}
+
+	*a = append(*a, h)
+}
+
+// RFC8628UserAuthorizeEndpointHandlers is a list of RFC8628UserAuthorizeEndpointHandler
+type RFC8628UserAuthorizeEndpointHandlers []RFC8628UserAuthorizeEndpointHandler
+
+// Append adds an RFC8628UserAuthorizeEndpointHandler to this list. Ignores duplicates based on reflect.TypeOf.
+func (a *RFC8628UserAuthorizeEndpointHandlers) Append(h RFC8628UserAuthorizeEndpointHandler) {
+	for _, this := range *a {
+		if reflect.TypeOf(this) == reflect.TypeOf(h) {
+			return
+		}
+	}
+
+	*a = append(*a, h)
+}
+
 var _ OAuth2Provider = (*Fosite)(nil)
 
 type Configurator interface {
@@ -131,6 +159,9 @@ type Configurator interface {
 	TokenIntrospectionHandlersProvider
 	RevocationHandlersProvider
 	UseLegacyErrorFormatProvider
+	DeviceAuthorizeEndpointHandlersProvider
+	RFC8628UserAuthorizeEndpointHandlersProvider
+	DeviceAuthorizeConfigProvider
 	JWTValidationTimeSkewConfigProvider
 }
 
