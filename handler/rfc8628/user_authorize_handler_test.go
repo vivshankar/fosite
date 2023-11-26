@@ -19,7 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *testing.T) {
+func TestUserAuthorizeHandler_PopulateRFC8628UserAuthorizeEndpointResponse(t *testing.T) {
 	type fields struct {
 		Storage  RFC8628CodeStorage
 		Strategy RFC8628CodeStrategy
@@ -30,7 +30,7 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *te
 	type args struct {
 		ctx    context.Context
 		req    fosite.DeviceAuthorizeRequester
-		resp   fosite.RFC8623UserAuthorizeResponder
+		resp   fosite.RFC8628UserAuthorizeResponder
 		status fosite.DeviceAuthorizeStatus
 	}
 
@@ -49,7 +49,7 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *te
 		dar.SetStatus(a.status)
 	}
 
-	defaultCheckFunc := func(t *testing.T, duvr fosite.RFC8623UserAuthorizeResponder, a *args) {
+	defaultCheckFunc := func(t *testing.T, duvr fosite.RFC8628UserAuthorizeResponder, a *args) {
 		assert.NotEmpty(t, duvr)
 		assert.Equal(t, fosite.DeviceAuthorizeStatusToString(a.status), duvr.GetStatus())
 	}
@@ -59,7 +59,7 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *te
 		fields  fields
 		args    args
 		setup   func(t *testing.T, dar fosite.DeviceAuthorizeRequester, f *fields, a *args)
-		check   func(t *testing.T, duvr fosite.RFC8623UserAuthorizeResponder, a *args)
+		check   func(t *testing.T, duvr fosite.RFC8628UserAuthorizeResponder, a *args)
 		wantErr assert.ErrorAssertionFunc
 	}{
 		{
@@ -70,7 +70,7 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *te
 				Config: &fosite.Config{
 					DeviceAndUserCodeLifespan:      time.Minute * 10,
 					DeviceAuthTokenPollingInterval: time.Second * 10,
-					RFC8623UserVerificationURL:     "https://www.test.com",
+					RFC8628UserVerificationURL:     "https://www.test.com",
 					AccessTokenLifespan:            time.Hour,
 					RefreshTokenLifespan:           time.Hour,
 					ScopeStrategy:                  fosite.HierarchicScopeStrategy,
@@ -81,7 +81,7 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *te
 			args: args{
 				ctx:    context.TODO(),
 				req:    fosite.NewDeviceAuthorizeRequest(),
-				resp:   fosite.NewRFC8623UserAuthorizeResponse(),
+				resp:   fosite.NewRFC8628UserAuthorizeResponse(),
 				status: fosite.DeviceAuthorizeStatusApproved,
 			},
 			setup: defaultSetupFunc,
@@ -99,7 +99,7 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *te
 				Config: &fosite.Config{
 					DeviceAndUserCodeLifespan:      time.Minute * 10,
 					DeviceAuthTokenPollingInterval: time.Second * 10,
-					RFC8623UserVerificationURL:     "https://www.test.com",
+					RFC8628UserVerificationURL:     "https://www.test.com",
 					AccessTokenLifespan:            time.Hour,
 					RefreshTokenLifespan:           time.Hour,
 					ScopeStrategy:                  fosite.HierarchicScopeStrategy,
@@ -110,7 +110,7 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *te
 			args: args{
 				ctx:    context.TODO(),
 				req:    fosite.NewDeviceAuthorizeRequest(),
-				resp:   fosite.NewRFC8623UserAuthorizeResponse(),
+				resp:   fosite.NewRFC8628UserAuthorizeResponse(),
 				status: fosite.DeviceAuthorizeStatusDenied,
 			},
 			setup: defaultSetupFunc,
@@ -128,7 +128,7 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *te
 				Config: &fosite.Config{
 					DeviceAndUserCodeLifespan:      time.Minute * 10,
 					DeviceAuthTokenPollingInterval: time.Second * 10,
-					RFC8623UserVerificationURL:     "https://www.test.com",
+					RFC8628UserVerificationURL:     "https://www.test.com",
 					AccessTokenLifespan:            time.Hour,
 					RefreshTokenLifespan:           time.Hour,
 					ScopeStrategy:                  fosite.HierarchicScopeStrategy,
@@ -139,7 +139,7 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *te
 			args: args{
 				ctx:    context.TODO(),
 				req:    fosite.NewDeviceAuthorizeRequest(),
-				resp:   fosite.NewRFC8623UserAuthorizeResponse(),
+				resp:   fosite.NewRFC8628UserAuthorizeResponse(),
 				status: fosite.DeviceAuthorizeStatusNew,
 			},
 			setup: defaultSetupFunc,
@@ -157,7 +157,7 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *te
 				Config: &fosite.Config{
 					DeviceAndUserCodeLifespan:      time.Minute * 10,
 					DeviceAuthTokenPollingInterval: time.Second * 10,
-					RFC8623UserVerificationURL:     "https://www.test.com",
+					RFC8628UserVerificationURL:     "https://www.test.com",
 					AccessTokenLifespan:            time.Hour,
 					RefreshTokenLifespan:           time.Hour,
 					ScopeStrategy:                  fosite.HierarchicScopeStrategy,
@@ -168,7 +168,7 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *te
 			args: args{
 				ctx:    context.TODO(),
 				req:    fosite.NewDeviceAuthorizeRequest(),
-				resp:   fosite.NewRFC8623UserAuthorizeResponse(),
+				resp:   fosite.NewRFC8628UserAuthorizeResponse(),
 				status: 1234,
 			},
 			setup: defaultSetupFunc,
@@ -190,8 +190,8 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *te
 				tt.setup(t, tt.args.req, &tt.fields, &tt.args)
 			}
 			if tt.wantErr != nil {
-				tt.wantErr(t, d.PopulateRFC8623UserAuthorizeEndpointResponse(tt.args.ctx, tt.args.req, tt.args.resp),
-					fmt.Sprintf("PopulateRFC8623UserAuthorizeEndpointResponse(%v, %v, %v)",
+				tt.wantErr(t, d.PopulateRFC8628UserAuthorizeEndpointResponse(tt.args.ctx, tt.args.req, tt.args.resp),
+					fmt.Sprintf("PopulateRFC8628UserAuthorizeEndpointResponse(%v, %v, %v)",
 						tt.args.ctx, tt.args.req, tt.args.resp))
 			}
 			if tt.check != nil {
@@ -201,7 +201,7 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *te
 	}
 }
 
-func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse_HandleRFC8623UserAuthorizeEndpointRequest(t *testing.T) {
+func TestUserAuthorizeHandler_PopulateRFC8628UserAuthorizeEndpointResponse_HandleRFC8628UserAuthorizeEndpointRequest(t *testing.T) {
 	type fields struct {
 		Storage  RFC8628CodeStorage
 		Strategy RFC8628CodeStrategy
@@ -263,7 +263,7 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse_Handl
 				Config: &fosite.Config{
 					DeviceAndUserCodeLifespan:      time.Minute * 10,
 					DeviceAuthTokenPollingInterval: time.Second * 10,
-					RFC8623UserVerificationURL:     "https://www.test.com",
+					RFC8628UserVerificationURL:     "https://www.test.com",
 					AccessTokenLifespan:            time.Hour,
 					RefreshTokenLifespan:           time.Hour,
 					ScopeStrategy:                  fosite.HierarchicScopeStrategy,
@@ -296,7 +296,7 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse_Handl
 				Config: &fosite.Config{
 					DeviceAndUserCodeLifespan:      time.Minute * 10,
 					DeviceAuthTokenPollingInterval: time.Second * 10,
-					RFC8623UserVerificationURL:     "https://www.test.com",
+					RFC8628UserVerificationURL:     "https://www.test.com",
 					AccessTokenLifespan:            time.Hour,
 					RefreshTokenLifespan:           time.Hour,
 					ScopeStrategy:                  fosite.HierarchicScopeStrategy,
@@ -328,7 +328,7 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse_Handl
 				Config: &fosite.Config{
 					DeviceAndUserCodeLifespan:      time.Minute * 10,
 					DeviceAuthTokenPollingInterval: time.Second * 10,
-					RFC8623UserVerificationURL:     "https://www.test.com",
+					RFC8628UserVerificationURL:     "https://www.test.com",
 					AccessTokenLifespan:            time.Hour,
 					RefreshTokenLifespan:           time.Hour,
 					ScopeStrategy:                  fosite.HierarchicScopeStrategy,
@@ -364,7 +364,7 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse_Handl
 				Config: &fosite.Config{
 					DeviceAndUserCodeLifespan:      time.Minute * 10,
 					DeviceAuthTokenPollingInterval: time.Second * 10,
-					RFC8623UserVerificationURL:     "https://www.test.com",
+					RFC8628UserVerificationURL:     "https://www.test.com",
 					AccessTokenLifespan:            time.Hour,
 					RefreshTokenLifespan:           time.Hour,
 					ScopeStrategy:                  fosite.HierarchicScopeStrategy,
@@ -407,7 +407,7 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse_Handl
 				Config: &fosite.Config{
 					DeviceAndUserCodeLifespan:      time.Minute * 10,
 					DeviceAuthTokenPollingInterval: time.Second * 10,
-					RFC8623UserVerificationURL:     "https://www.test.com",
+					RFC8628UserVerificationURL:     "https://www.test.com",
 					AccessTokenLifespan:            time.Hour,
 					RefreshTokenLifespan:           time.Hour,
 					ScopeStrategy:                  fosite.HierarchicScopeStrategy,
@@ -457,8 +457,8 @@ func TestUserAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse_Handl
 				tt.setup(t, tt.args.req, &tt.fields, &tt.args)
 			}
 			if tt.wantErr != nil {
-				tt.wantErr(t, d.HandleRFC8623UserAuthorizeEndpointRequest(tt.args.ctx, tt.args.req),
-					fmt.Sprintf("HandleRFC8623UserAuthorizeEndpointRequest(%v, %v)", tt.args.ctx, tt.args.req))
+				tt.wantErr(t, d.HandleRFC8628UserAuthorizeEndpointRequest(tt.args.ctx, tt.args.req),
+					fmt.Sprintf("HandleRFC8628UserAuthorizeEndpointRequest(%v, %v)", tt.args.ctx, tt.args.req))
 			}
 		})
 	}

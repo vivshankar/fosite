@@ -201,23 +201,23 @@ type OAuth2Provider interface {
 	// "application/json" format [RFC8259] with a 200 (OK) status code.
 	WriteDeviceAuthorizeResponse(ctx context.Context, rw http.ResponseWriter, requester DeviceAuthorizeRequester, responder DeviceAuthorizeResponder)
 
-	// WriteRFC8623UserAuthorizeResponse returns the device grant user verification result in a JSON formatted manner.
+	// WriteRFC8628UserAuthorizeResponse returns the device grant user verification result in a JSON formatted manner.
 	//
 	// The following specs must be considered in any implementation of this method:
 	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.3 (everything MUST be implemented)
 	// Response is a HTTP response body using the
 	// "application/json" format [RFC8259] with a 200 (OK) status code.
-	WriteRFC8623UserAuthorizeResponse(cxt context.Context, rw http.ResponseWriter, requester DeviceAuthorizeRequester, responder RFC8623UserAuthorizeResponder)
+	WriteRFC8628UserAuthorizeResponse(cxt context.Context, rw http.ResponseWriter, requester DeviceAuthorizeRequester, responder RFC8628UserAuthorizeResponder)
 
-	// WriteRFC8623UserAuthorizeError returns the device grant user verification error in a JSON formatted manner.
+	// WriteRFC8628UserAuthorizeError returns the device grant user verification error in a JSON formatted manner.
 	//
 	// The following specs must be considered in any implementation of this method:
 	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.3 (everything MUST be implemented)
 	// Response is a HTTP response body using the
 	// "application/json" format [RFC8259] with a 200 (OK) status code.
-	WriteRFC8623UserAuthorizeError(_ context.Context, rw http.ResponseWriter, requester DeviceAuthorizeRequester, err error)
+	WriteRFC8628UserAuthorizeError(_ context.Context, rw http.ResponseWriter, requester DeviceAuthorizeRequester, err error)
 
-	// NewRFC8623UserAuthorizeRequest validate the OAuth 2.0 Device Authorization Flow - User interaction Request
+	// NewRFC8628UserAuthorizeRequest validate the OAuth 2.0 Device Authorization Flow - User interaction Request
 	//
 	// The following specs must be considered in any implementation of this method:
 	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.3 (everything MUST be implemented)
@@ -225,16 +225,16 @@ type OAuth2Provider interface {
 	// omitted from the request. The authorization server MUST ignore
 	// unrecognized request parameters. Request and response parameters
 	// MUST NOT be included more than once.
-	NewRFC8623UserAuthorizeRequest(ctx context.Context, req *http.Request) (DeviceAuthorizeRequester, error)
+	NewRFC8628UserAuthorizeRequest(ctx context.Context, req *http.Request) (DeviceAuthorizeRequester, error)
 
-	// NewRFC8623UserAuthorizeResponse persists the DeviceCodeSession and UserCodeSession in the store
+	// NewRFC8628UserAuthorizeResponse persists the DeviceCodeSession and UserCodeSession in the store
 	//
 	// The following specs must be considered in any implementation of this method:
 	// * https://www.rfc-editor.org/rfc/rfc8628#section-3.2 (everything MUST be implemented)
 	// In response, the authorization server generates a unique device
 	// verification code and an end-user code that are valid for a limited
 	// time
-	NewRFC8623UserAuthorizeResponse(ctx context.Context, requester DeviceAuthorizeRequester, session Session) (RFC8623UserAuthorizeResponder, error)
+	NewRFC8628UserAuthorizeResponse(ctx context.Context, requester DeviceAuthorizeRequester, session Session) (RFC8628UserAuthorizeResponder, error)
 }
 
 // IntrospectionResponder is the response object that will be returned when token introspection was successful,
@@ -501,8 +501,8 @@ type DeviceAuthorizeResponder interface {
 	ToMap() map[string]interface{}
 }
 
-// RFC8623UserAuthorizeResponder is device grant user verification endpoint response.
-type RFC8623UserAuthorizeResponder interface {
+// RFC8628UserAuthorizeResponder is device grant user verification endpoint response.
+type RFC8628UserAuthorizeResponder interface {
 	// GetHeader returns the response's header
 	GetHeader() (header http.Header)
 

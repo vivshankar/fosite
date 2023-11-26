@@ -12,7 +12,7 @@ import (
 	"github.com/ory/x/errorsx"
 )
 
-func (f *Fosite) NewRFC8623UserAuthorizeRequest(ctx context.Context, req *http.Request) (DeviceAuthorizeRequester, error) {
+func (f *Fosite) NewRFC8628UserAuthorizeRequest(ctx context.Context, req *http.Request) (DeviceAuthorizeRequester, error) {
 	request := NewDeviceAuthorizeRequest()
 	request.Lang = i18n.GetLangFromRequest(f.Config.GetMessageCatalog(ctx), req)
 
@@ -21,8 +21,8 @@ func (f *Fosite) NewRFC8623UserAuthorizeRequest(ctx context.Context, req *http.R
 	}
 	request.Form = req.Form
 
-	for _, h := range f.Config.GetRFC8623UserAuthorizeEndpointHandlers(ctx) {
-		if err := h.HandleRFC8623UserAuthorizeEndpointRequest(ctx, request); err != nil && !errors.Is(err, ErrUnknownRequest) {
+	for _, h := range f.Config.GetRFC8628UserAuthorizeEndpointHandlers(ctx) {
+		if err := h.HandleRFC8628UserAuthorizeEndpointRequest(ctx, request); err != nil && !errors.Is(err, ErrUnknownRequest) {
 			return nil, err
 		}
 	}

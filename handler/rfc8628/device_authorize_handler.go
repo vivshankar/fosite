@@ -51,8 +51,8 @@ func (d *DeviceAuthorizeHandler) HandleDeviceAuthorizeEndpointRequest(ctx contex
 	// Populate the response fields
 	resp.SetDeviceCode(deviceCode)
 	resp.SetUserCode(userCode)
-	resp.SetVerificationURI(d.Config.GetRFC8623UserVerificationURL(ctx))
-	resp.SetVerificationURIComplete(d.Config.GetRFC8623UserVerificationURL(ctx) + "?user_code=" + userCode)
+	resp.SetVerificationURI(d.Config.GetRFC8628UserVerificationURL(ctx))
+	resp.SetVerificationURIComplete(d.Config.GetRFC8628UserVerificationURL(ctx) + "?user_code=" + userCode)
 	resp.SetExpiresIn(int64(time.Until(expireAt).Seconds()))
 	resp.SetInterval(int(d.Config.GetDeviceAuthTokenPollingInterval(ctx).Seconds()))
 	return nil

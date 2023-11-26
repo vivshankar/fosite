@@ -11,17 +11,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFosite_WriteRFC8623UserAuthorizeError(t *testing.T) {
+func TestFosite_WriteRFC8628UserAuthorizeError(t *testing.T) {
 	oauth2 := &Fosite{Config: &Config{}}
 
 	rw := httptest.NewRecorder()
 	ar := &DeviceAuthorizeRequest{}
-	resp := &RFC8623UserAuthorizeResponse{Extra: map[string]interface{}{}}
+	resp := &RFC8628UserAuthorizeResponse{Extra: map[string]interface{}{}}
 
 	resp.SetStatus(DeviceAuthorizeStatusToString(DeviceAuthorizeStatusApproved))
 
-	oauth2.WriteRFC8623UserAuthorizeResponse(context.Background(), rw, ar, resp)
-	wroteDeviceResponse := RFC8623UserAuthorizeResponse{Extra: map[string]interface{}{}}
+	oauth2.WriteRFC8628UserAuthorizeResponse(context.Background(), rw, ar, resp)
+	wroteDeviceResponse := RFC8628UserAuthorizeResponse{Extra: map[string]interface{}{}}
 	err := wroteDeviceResponse.FromJson(rw.Body)
 	require.NoError(t, err)
 
@@ -31,14 +31,14 @@ func TestFosite_WriteRFC8623UserAuthorizeError(t *testing.T) {
 	assert.Equal(t, "application/json;charset=UTF-8", rw.Header().Get("Content-Type"))
 }
 
-func TestFosite_WriteRFC8623UserAuthorizeResponse(t *testing.T) {
+func TestFosite_WriteRFC8628UserAuthorizeResponse(t *testing.T) {
 	oauth2 := &Fosite{Config: &Config{}}
 
 	rw := httptest.NewRecorder()
 	ar := &DeviceAuthorizeRequest{}
 	theErr := ErrInvalidGrant.WithDescription("invalid grant message.")
 
-	oauth2.WriteRFC8623UserAuthorizeError(context.Background(), rw, ar, theErr)
+	oauth2.WriteRFC8628UserAuthorizeError(context.Background(), rw, ar, theErr)
 
 	result := map[string]string{}
 	err := json.NewDecoder(rw.Body).Decode(&result)

@@ -28,7 +28,7 @@ func Test_HandleDeviceEndpointRequest(t *testing.T) {
 		Config: &fosite.Config{
 			DeviceAndUserCodeLifespan:      time.Minute * 10,
 			DeviceAuthTokenPollingInterval: time.Second * 10,
-			RFC8623UserVerificationURL:     "https://www.test.com",
+			RFC8628UserVerificationURL:     "https://www.test.com",
 			AccessTokenLifespan:            time.Hour,
 			RefreshTokenLifespan:           time.Hour,
 			ScopeStrategy:                  fosite.HierarchicScopeStrategy,

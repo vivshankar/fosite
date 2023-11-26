@@ -25,15 +25,15 @@ type OpenIDConnectDeviceAuthorizeHandler struct {
 }
 
 var (
-	_ fosite.RFC8623UserAuthorizeEndpointHandler = (*OpenIDConnectDeviceAuthorizeHandler)(nil)
+	_ fosite.RFC8628UserAuthorizeEndpointHandler = (*OpenIDConnectDeviceAuthorizeHandler)(nil)
 	_ fosite.TokenEndpointHandler                = (*OpenIDConnectDeviceAuthorizeHandler)(nil)
 )
 
-func (c *OpenIDConnectDeviceAuthorizeHandler) HandleRFC8623UserAuthorizeEndpointRequest(_ context.Context, _ fosite.DeviceAuthorizeRequester) error {
+func (c *OpenIDConnectDeviceAuthorizeHandler) HandleRFC8628UserAuthorizeEndpointRequest(_ context.Context, _ fosite.DeviceAuthorizeRequester) error {
 	return errorsx.WithStack(fosite.ErrUnknownRequest)
 }
 
-func (c *OpenIDConnectDeviceAuthorizeHandler) PopulateRFC8623UserAuthorizeEndpointResponse(ctx context.Context, req fosite.DeviceAuthorizeRequester, _ fosite.RFC8623UserAuthorizeResponder) error {
+func (c *OpenIDConnectDeviceAuthorizeHandler) PopulateRFC8628UserAuthorizeEndpointResponse(ctx context.Context, req fosite.DeviceAuthorizeRequester, _ fosite.RFC8628UserAuthorizeResponder) error {
 	if !(req.GetGrantedScopes().Has("openid")) {
 		return nil
 	}

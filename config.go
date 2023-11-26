@@ -275,11 +275,11 @@ type DeviceAuthorizeEndpointHandlersProvider interface {
 	GetDeviceAuthorizeEndpointHandlers(ctx context.Context) DeviceAuthorizeEndpointHandlers
 }
 
-// RFC8623UserAuthorizeEndpointHandlersProvider returns the provider for setting up the Device grant user interaction handlers.
-type RFC8623UserAuthorizeEndpointHandlersProvider interface {
+// RFC8628UserAuthorizeEndpointHandlersProvider returns the provider for setting up the Device grant user interaction handlers.
+type RFC8628UserAuthorizeEndpointHandlersProvider interface {
 
-	// GetRFC8623UserAuthorizeEndpointHandlers returns the handlers.
-	GetRFC8623UserAuthorizeEndpointHandlers(ctx context.Context) RFC8623UserAuthorizeEndpointHandlers
+	// GetRFC8628UserAuthorizeEndpointHandlers returns the handlers.
+	GetRFC8628UserAuthorizeEndpointHandlers(ctx context.Context) RFC8628UserAuthorizeEndpointHandlers
 }
 
 // DeviceAuthorizeConfigProvider returns the provider for configuring the device authorization response
@@ -287,7 +287,7 @@ type RFC8623UserAuthorizeEndpointHandlersProvider interface {
 type DeviceAuthorizeConfigProvider interface {
 	// GetDeviceAndUserCodeLifespan returns the device and user code lifespan.
 	GetDeviceAndUserCodeLifespan(ctx context.Context) time.Duration
-	GetRFC8623UserVerificationURL(ctx context.Context) string
+	GetRFC8628UserVerificationURL(ctx context.Context) string
 	GetDeviceAuthTokenPollingInterval(ctx context.Context) time.Duration
 }
 

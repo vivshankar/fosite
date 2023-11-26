@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestOpenIDConnectDeviceAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpointResponse(t *testing.T) {
+func TestOpenIDConnectDeviceAuthorizeHandler_PopulateRFC8628UserAuthorizeEndpointResponse(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -48,7 +48,7 @@ func TestOpenIDConnectDeviceAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpoin
 		},
 	}
 	req := fosite.NewDeviceAuthorizeRequest()
-	resp := fosite.NewRFC8623UserAuthorizeResponse()
+	resp := fosite.NewRFC8628UserAuthorizeResponse()
 
 	for k, c := range []struct {
 		description string
@@ -107,7 +107,7 @@ func TestOpenIDConnectDeviceAuthorizeHandler_PopulateRFC8623UserAuthorizeEndpoin
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 			c.setup()
-			err := handler.PopulateRFC8623UserAuthorizeEndpointResponse(context.TODO(), req, resp)
+			err := handler.PopulateRFC8628UserAuthorizeEndpointResponse(context.TODO(), req, resp)
 
 			if c.expectErr != nil {
 				require.EqualError(t, err, c.expectErr.Error())
