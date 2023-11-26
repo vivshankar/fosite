@@ -62,9 +62,11 @@ var (
 	_ RevocationHandlersProvider                   = (*Config)(nil)
 	_ PushedAuthorizeRequestHandlersProvider       = (*Config)(nil)
 	_ PushedAuthorizeRequestConfigProvider         = (*Config)(nil)
+	_ RFC8693ConfigProvider                        = (*Config)(nil)
 	_ DeviceAuthorizeEndpointHandlersProvider      = (*Config)(nil)
 	_ RFC8628UserAuthorizeEndpointHandlersProvider = (*Config)(nil)
 	_ DeviceAuthorizeConfigProvider                = (*Config)(nil)
+	_ JWTValidationTimeSkewConfigProvider          = (*Config)(nil)
 )
 
 type Config struct {
@@ -234,6 +236,18 @@ type Config struct {
 	RFC8693TokenTypes map[string]RFC8693TokenType
 
 	DefaultRequestedTokenType string
+
+	// RequestObjectValidationTimeSkew is validation time skew for request object JWT 'iat', 'exp' and 'nbf'.
+	RequestObjectValidationTimeSkew time.Duration
+
+	// ClientAssertionValidationTimeSkew is validation time skew for client assertion JWT 'iat', 'exp' and 'nbf'.
+	ClientAssertionValidationTimeSkew time.Duration
+
+	// JWTBearerValidationTimeSkew is validation time skew for JWT bearer 'iat', 'exp' and 'nbf'.
+	JWTBearerValidationTimeSkew time.Duration
+
+	// JWTTokenValidationTimeSkew is validation time skew for JWT token 'iat', 'exp' and 'nbf.
+	JWTTokenValidationTimeSkew time.Duration
 }
 
 func (c *Config) GetGlobalSecret(ctx context.Context) ([]byte, error) {
@@ -544,4 +558,20 @@ func (c *Config) GetDeviceAuthTokenPollingInterval(_ context.Context) time.Durat
 		return time.Second * 10
 	}
 	return c.DeviceAuthTokenPollingInterval
+}
+
+func (c *Config) GetRequestObjectValidationTimeSkew(_ context.Context) time.Duration {
+	return c.RequestObjectValidationTimeSkew
+}
+
+func (c *Config) GetClientAssertionValidationTimeSkew(_ context.Context) time.Duration {
+	return c.ClientAssertionValidationTimeSkew
+}
+
+func (c *Config) GetJWTBearerValidationTimeSkew(_ context.Context) time.Duration {
+	return c.JWTBearerValidationTimeSkew
+}
+
+func (c *Config) GetJWTTokenValidationTimeSkew(_ context.Context) time.Duration {
+	return c.JWTTokenValidationTimeSkew
 }
