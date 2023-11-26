@@ -6,6 +6,8 @@ package compose
 import (
 	"context"
 
+	"github.com/ory/fosite/handler/rfc8628"
+
 	"github.com/ory/fosite"
 	"github.com/ory/fosite/handler/oauth2"
 	"github.com/ory/fosite/handler/openid"
@@ -15,6 +17,7 @@ import (
 
 type CommonStrategy struct {
 	oauth2.CoreStrategy
+	rfc8628.RFC8628CodeStrategy
 	openid.OpenIDConnectTokenStrategy
 	jwt.Signer
 }
@@ -27,6 +30,7 @@ type HMACSHAStrategyConfigurator interface {
 	fosite.GlobalSecretProvider
 	fosite.RotatedGlobalSecretsProvider
 	fosite.HMACHashingProvider
+	fosite.DeviceAuthorizeConfigProvider
 }
 
 func NewOAuth2HMACStrategy(config HMACSHAStrategyConfigurator) *oauth2.HMACSHAStrategy {
@@ -47,6 +51,13 @@ func NewOAuth2JWTStrategy(keyGetter func(context.Context) (interface{}, error), 
 func NewOpenIDConnectStrategy(keyGetter func(context.Context) (interface{}, error), config fosite.Configurator) *openid.DefaultStrategy {
 	return &openid.DefaultStrategy{
 		Signer: &jwt.DefaultSigner{GetPrivateKey: keyGetter},
+		Config: config,
+	}
+}
+
+func NewDeviceStrategy(config fosite.Configurator) *rfc8628.DefaultDeviceStrategy {
+	return &rfc8628.DefaultDeviceStrategy{
+		Enigma: &hmac.HMACStrategy{Config: config},
 		Config: config,
 	}
 }
