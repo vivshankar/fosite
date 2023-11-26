@@ -19,6 +19,8 @@ type DeviceAuthorizeHandler struct {
 	}
 }
 
+var _ fosite.DeviceAuthorizeEndpointHandler = (*DeviceAuthorizeHandler)(nil)
+
 // HandleDeviceAuthorizeEndpointRequest is a response handler for the Device Authorisation Grant as
 // defined in https://tools.ietf.org/html/rfc8628#section-3.1
 func (d *DeviceAuthorizeHandler) HandleDeviceAuthorizeEndpointRequest(ctx context.Context, dar fosite.DeviceAuthorizeRequester, resp fosite.DeviceAuthorizeResponder) error {

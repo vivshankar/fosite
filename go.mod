@@ -19,7 +19,7 @@ require (
 	github.com/cristalhq/jwt/v4 v4.0.2
 	github.com/dgraph-io/ristretto v0.0.3
 	github.com/ecordell/optgen v0.0.6
-	github.com/go-jose/go-jose/v3 v3.0.0
+	github.com/go-jose/go-jose/v3 v3.0.1
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/mux v1.8.0
