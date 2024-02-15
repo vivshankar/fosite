@@ -7,6 +7,7 @@ import (
 	"github.com/ory/fosite"
 	"github.com/ory/fosite/handler/oauth2"
 	"github.com/ory/fosite/handler/openid"
+	"github.com/ory/fosite/handler/rfc8628"
 	"github.com/ory/fosite/token/jwt"
 )
 
@@ -77,5 +78,21 @@ func OpenIDConnectHybridFactory(config fosite.Configurator, storage interface{},
 		},
 		OpenIDConnectRequestStorage:   storage.(openid.OpenIDConnectRequestStorage),
 		OpenIDConnectRequestValidator: openid.NewOpenIDConnectRequestValidator(strategy.(jwt.Signer), config),
+	}
+}
+
+func OpenIDConnectDeviceAuthorizeFactory(config fosite.Configurator, storage interface{}, strategy interface{}) interface{} {
+	return &openid.OpenIDConnectDeviceAuthorizeHandler{
+		OpenIDConnectRequestStorage:   storage.(openid.OpenIDConnectRequestStorage),
+		OpenIDConnectRequestValidator: openid.NewOpenIDConnectRequestValidator(strategy.(jwt.Signer), config),
+		CodeTokenEndpointHandler: &rfc8628.DeviceCodeTokenHandler{
+			Strategy: strategy.(rfc8628.RFC8628CodeStrategy),
+			Storage:  storage.(rfc8628.RFC8628CodeStorage),
+			Config:   config,
+		},
+		Config: config,
+		IDTokenHandleHelper: &openid.IDTokenHandleHelper{
+			IDTokenStrategy: strategy.(openid.OpenIDConnectTokenStrategy),
+		},
 	}
 }

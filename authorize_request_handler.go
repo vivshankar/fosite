@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/go-jose/go-jose/v3"
-	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ory/fosite/i18n"
 	"github.com/ory/fosite/token/jwt"
@@ -21,6 +20,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ory/go-convenience/stringslice"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func wrapSigningKeyFailure(outer *RFC6749Error, inner error) *RFC6749Error {
