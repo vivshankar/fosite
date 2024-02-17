@@ -30,8 +30,8 @@ func (h *DefaultDeviceStrategy) GenerateUserCode(ctx context.Context) (token str
 		return "", "", err
 	}
 	userCode := string(seq)
-	signUserCode, signErr := h.UserCodeSignature(ctx, userCode)
-	if signErr != nil {
+	signUserCode, err := h.UserCodeSignature(ctx, userCode)
+	if err != nil {
 		return "", "", err
 	}
 	return userCode, signUserCode, nil
