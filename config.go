@@ -275,6 +275,28 @@ type RevocationHandlersProvider interface {
 	GetRevocationHandlers(ctx context.Context) RevocationHandlers
 }
 
+// DeviceAuthorizeEndpointHandlersProvider returns the provider for setting up the Device authorization handlers.
+type DeviceAuthorizeEndpointHandlersProvider interface {
+	// GetDeviceAuthorizeEndpointHandlers returns the handlers.
+	GetDeviceAuthorizeEndpointHandlers(ctx context.Context) DeviceAuthorizeEndpointHandlers
+}
+
+// RFC8628UserAuthorizeEndpointHandlersProvider returns the provider for setting up the Device grant user interaction handlers.
+type RFC8628UserAuthorizeEndpointHandlersProvider interface {
+
+	// GetRFC8628UserAuthorizeEndpointHandlers returns the handlers.
+	GetRFC8628UserAuthorizeEndpointHandlers(ctx context.Context) RFC8628UserAuthorizeEndpointHandlers
+}
+
+// DeviceAuthorizeConfigProvider returns the provider for configuring the device authorization response
+// (see https://www.rfc-editor.org/rfc/rfc8628#section-3.2)
+type DeviceAuthorizeConfigProvider interface {
+	// GetDeviceAndUserCodeLifespan returns the device and user code lifespan.
+	GetDeviceAndUserCodeLifespan(ctx context.Context) time.Duration
+	GetRFC8628UserVerificationURL(ctx context.Context) string
+	GetDeviceAuthTokenPollingInterval(ctx context.Context) time.Duration
+}
+
 // PushedAuthorizeEndpointHandlersProvider returns the provider for configuring the PAR handlers.
 type PushedAuthorizeRequestHandlersProvider interface {
 	// GetPushedAuthorizeEndpointHandlers returns the handlers.
@@ -305,4 +327,29 @@ type PushedAuthorizeRequestConfigProvider interface {
 	// cannot pass authorize parameters at the 'authorize' endpoint. The 'authorize' endpoint
 	// must contain the PAR request_uri.
 	EnforcePushedAuthorize(ctx context.Context) bool
+}
+
+type RFC8693ConfigProvider interface {
+	GetTokenTypes(ctx context.Context) map[string]RFC8693TokenType
+
+	GetDefaultRequestedTokenType(ctx context.Context) string
+}
+
+// JWTValidationTimeSkewConfigProvider is configuration provider for JWT validation time skew.
+type JWTValidationTimeSkewConfigProvider interface {
+	// GetRequestObjectValidationTimeSkew is validation time skew for request object JWT 'iat', 'exp' and 'nbf'.
+	// For dcr, par or authorize.
+	GetRequestObjectValidationTimeSkew(ctx context.Context) time.Duration
+
+	// GetClientAssertionValidationTimeSkew is validation time skew for client assertion JWT 'iat', 'exp' and 'nbf'.
+	// For client authentication.
+	GetClientAssertionValidationTimeSkew(ctx context.Context) time.Duration
+
+	// GetJWTBearerValidationTimeSkew is validation time skew for JWT bearer 'iat', 'exp' and 'nbf'.
+	// For jwt bearer flow.
+	GetJWTBearerValidationTimeSkew(ctx context.Context) time.Duration
+
+	// GetJWTTokenValidationTimeSkew is validation time skew for JWT token 'iat', 'exp' and 'nbf.
+	// For token exchange flow.
+	GetJWTTokenValidationTimeSkew(ctx context.Context) time.Duration
 }
