@@ -289,6 +289,7 @@ type DeviceAuthorizeConfigProvider interface {
 	GetDeviceAndUserCodeLifespan(ctx context.Context) time.Duration
 	GetRFC8628UserVerificationURL(ctx context.Context) string
 	GetDeviceAuthTokenPollingInterval(ctx context.Context) time.Duration
+	ShouldAuthenticateClientOnDeviceAuthorize(ctx context.Context) bool
 }
 
 // PushedAuthorizeEndpointHandlersProvider returns the provider for configuring the PAR handlers.

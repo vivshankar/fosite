@@ -42,9 +42,18 @@ func (f *Fosite) NewDeviceAuthorizeRequest(ctx context.Context, req *http.Reques
 	}
 	request.Form = req.PostForm
 
-	client, err := f.Store.GetClient(ctx, request.GetRequestForm().Get("client_id"))
-	if err != nil {
-		return nil, errorsx.WithStack(ErrInvalidClient.WithHint("The requested OAuth 2.0 Client does not exist.").WithWrap(err).WithDebug(err.Error()))
+	var client Client
+	var err error
+	if f.Config.ShouldAuthenticateClientOnDeviceAuthorize(ctx) {
+		client, err = f.AuthenticateClient(ctx, req, req.PostForm)
+		if err != nil {
+			return nil, errorsx.WithStack(ErrInvalidClient.WithHint("The requested OAuth 2.0 Client could not be authenticated.").WithWrap(err).WithDebug(err.Error()))
+		}
+	} else {
+		client, err = f.Store.GetClient(ctx, request.GetRequestForm().Get("client_id"))
+		if err != nil {
+			return nil, errorsx.WithStack(ErrInvalidClient.WithHint("The requested OAuth 2.0 Client does not exist.").WithWrap(err).WithDebug(err.Error()))
+		}
 	}
 	request.Client = client
 
