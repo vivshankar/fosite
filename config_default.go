@@ -571,6 +571,10 @@ func (c *Config) GetDeviceAuthTokenPollingInterval(_ context.Context) time.Durat
 	return c.DeviceAuthTokenPollingInterval
 }
 
+func (c *Config) ShouldAuthenticateClientOnDeviceAuthorize(_ context.Context) bool {
+	return true
+}
+
 func (c *Config) GetRequestObjectValidationTimeSkew(_ context.Context) time.Duration {
 	return c.RequestObjectValidationTimeSkew
 }
