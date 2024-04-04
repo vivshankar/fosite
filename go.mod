@@ -11,7 +11,7 @@ require (
 	github.com/cristalhq/jwt/v4 v4.0.2
 	github.com/dgraph-io/ristretto v0.1.1
 	github.com/ecordell/optgen v0.0.9
-	github.com/go-jose/go-jose/v3 v3.0.1
+	github.com/go-jose/go-jose/v3 v3.0.3
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
@@ -29,7 +29,7 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/tidwall/gjson v1.14.3
 	go.opentelemetry.io/otel/trace v1.16.0
-	golang.org/x/crypto v0.15.0
+	golang.org/x/crypto v0.19.0
 	golang.org/x/net v0.18.0
 	golang.org/x/oauth2 v0.10.0
 	golang.org/x/text v0.14.0
@@ -88,14 +88,14 @@ require (
 	go.opentelemetry.io/otel/sdk v1.16.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.0.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
 	golang.org/x/tools v0.11.1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230731193218-e0aa005b6bdf // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230731193218-e0aa005b6bdf // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230731193218-e0aa005b6bdf // indirect
 	google.golang.org/grpc v1.57.0 // indirect
-	google.golang.org/protobuf v1.31.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
