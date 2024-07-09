@@ -5,6 +5,7 @@ package rfc8628
 
 import (
 	"context"
+	"net/url"
 	"time"
 
 	"github.com/ory/fosite"
@@ -57,8 +58,16 @@ func (d *DeviceAuthorizeHandler) HandleDeviceAuthorizeEndpointRequest(ctx contex
 	resp.SetDeviceCode(deviceCode)
 	resp.SetUserCode(userCode)
 	resp.SetVerificationURI(d.Config.GetRFC8628UserVerificationURL(ctx))
-	resp.SetVerificationURIComplete(d.Config.GetRFC8628UserVerificationURL(ctx) + "?user_code=" + userCode)
+	resp.SetVerificationURIComplete(d.formCompleteURI(d.Config.GetRFC8628UserVerificationURL(ctx), userCode))
 	resp.SetExpiresIn(int64(time.Until(expireAt).Seconds()))
 	resp.SetInterval(int(d.Config.GetDeviceAuthTokenPollingInterval(ctx).Seconds()))
 	return nil
+}
+
+func (d *DeviceAuthorizeHandler) formCompleteURI(verificationURI, userCode string) string {
+	u, _ := url.Parse(verificationURI)
+	qp := u.Query()
+	qp["user_code"] = []string{userCode}
+	u.RawQuery = qp.Encode()
+	return u.String()
 }
