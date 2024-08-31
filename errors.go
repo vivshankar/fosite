@@ -221,6 +221,11 @@ var (
 		ErrorField:       errSlowDown,
 		CodeField:        http.StatusBadRequest,
 	}
+	ErrInvalidAuthorizationDetails = &RFC6749Error{
+		DescriptionField: "Invalid authorization details provided. This could be because of an unknown type or invalid fields for a given type.",
+		ErrorField:       errInvalidAuthorizationDetails,
+		CodeField:        http.StatusBadRequest,
+	}
 )
 
 const (
@@ -261,6 +266,7 @@ const (
 	errAuthorizationPending         = "authorization_pending"
 	errDeviceExpiredToken           = "expired_token"
 	errSlowDown                     = "slow_down"
+	errInvalidAuthorizationDetails  = "invalid_authorization_details"
 )
 
 type (

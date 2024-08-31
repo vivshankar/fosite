@@ -257,6 +257,12 @@ type AuthorizeEndpointHandlersProvider interface {
 	GetAuthorizeEndpointHandlers(ctx context.Context) AuthorizeEndpointHandlers
 }
 
+// AuthorizeEndpointValidationHandlersProvider returns the provider for configuring the authorize endpoint validation handlers.
+type AuthorizeEndpointValidationHandlersProvider interface {
+	// GetAuthorizeEndpointValidationHandlers returns the authorize endpoint validation handlers.
+	GetAuthorizeEndpointValidationHandlers(ctx context.Context) AuthorizeEndpointValidationHandlers
+}
+
 // TokenEndpointHandlersProvider returns the provider for configuring the token endpoint handlers.
 type TokenEndpointHandlersProvider interface {
 	// GetTokenEndpointHandlers returns the token endpoint handlers.
@@ -279,6 +285,12 @@ type RevocationHandlersProvider interface {
 type DeviceAuthorizeEndpointHandlersProvider interface {
 	// GetDeviceAuthorizeEndpointHandlers returns the handlers.
 	GetDeviceAuthorizeEndpointHandlers(ctx context.Context) DeviceAuthorizeEndpointHandlers
+}
+
+// DeviceAuthorizeEndpointValidationHandlersProvider returns the provider for configuring the device authorize endpoint validation handlers.
+type DeviceAuthorizeEndpointValidationHandlersProvider interface {
+	// GetAuthorizeEndpointValidationHandlers returns the authorize endpoint validation handlers.
+	GetDeviceAuthorizeEndpointValidationHandlers(ctx context.Context) DeviceAuthorizeEndpointValidationHandlers
 }
 
 // RFC8628UserAuthorizeEndpointHandlersProvider returns the provider for setting up the Device grant user interaction handlers.
@@ -353,4 +365,22 @@ type JWTValidationTimeSkewConfigProvider interface {
 	// GetJWTTokenValidationTimeSkew is validation time skew for JWT token 'iat', 'exp' and 'nbf.
 	// For token exchange flow.
 	GetJWTTokenValidationTimeSkew(ctx context.Context) time.Duration
+}
+
+type RFC9396ConfigProvider interface {
+	// GetAuthorizationDetailTypesSupported returns the list of authorization detail types supported by
+	// the authorization server.
+	GetAuthorizationDetailTypesSupported(ctx context.Context) []string
+
+	// GetAuthorizationDetailTypeHandlers returns a set of type-based handlers to override the default
+	// behaviour of RFC9396DefaultAuthorizationDetailsTypeHandler. This is specifically necessary when
+	// a type has additional properties that are not covered within the common properties specified in
+	// the standard.
+	GetAuthorizationDetailTypeHandlers(ctx context.Context) map[string]RFC9396AuthorizationDetailsTypeHandler
+
+	// GetAuthorizationDetailsStrategy returns a RFC9396AuthorizationDetailsStrategy.
+	GetAuthorizationDetailsStrategy(ctx context.Context) RFC9396AuthorizationDetailsStrategy
+
+	// GetIgnoreUnknownAuthorizationDetailsType indicates if unknown authorization details should be ignored.
+	GetIgnoreUnknownAuthorizationDetailsType(ctx context.Context) bool
 }

@@ -409,5 +409,14 @@ func (f *Fosite) newAuthorizeRequest(ctx context.Context, r *http.Request, isPAR
 		return request, errorsx.WithStack(ErrInvalidState.WithHintf("Request parameter 'state' must be at least be %d characters long to ensure sufficient entropy.", f.GetMinParameterEntropy(ctx)))
 	}
 
+	// any additional validation and enrichment
+	if configProvider, ok := f.Config.(AuthorizeEndpointValidationHandlersProvider); ok {
+		for _, handler := range configProvider.GetAuthorizeEndpointValidationHandlers(ctx) {
+			if err := handler.ValidateAuthorizeEndpointRequest(ctx, request); err != nil {
+				return request, err
+			}
+		}
+	}
+
 	return request, nil
 }

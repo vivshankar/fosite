@@ -68,6 +68,13 @@ func (c *AuthorizeExplicitGrantHandler) HandleTokenEndpointRequest(ctx context.C
 	// Override audiences
 	request.SetRequestedAudience(authorizeRequest.GetRequestedAudience())
 
+	// Override authorization details
+	if rfc9396AuthorizeRequester, ok := authorizeRequest.(fosite.RFC9396Requester); ok {
+		if rfc9396Requester, ok := request.(fosite.RFC9396Requester); ok {
+			rfc9396Requester.SetRequestedAuthorizationDetails(rfc9396AuthorizeRequester.GetRequestedAuthorizationDetails())
+		}
+	}
+
 	// The authorization server MUST ensure that the authorization code was issued to the authenticated
 	// confidential client, or if the client is public, ensure that the
 	// code was issued to "client_id" in the request,
@@ -137,6 +144,14 @@ func (c *AuthorizeExplicitGrantHandler) PopulateTokenEndpointResponse(ctx contex
 
 	for _, audience := range authorizeRequest.GetGrantedAudience() {
 		requester.GrantAudience(audience)
+	}
+
+	if rfc9396AuthorizeRequester, ok := authorizeRequest.(fosite.RFC9396Requester); ok {
+		if rfc9396Requester, ok := requester.(fosite.RFC9396Requester); ok {
+			for _, ad := range rfc9396AuthorizeRequester.GetGrantedAuthorizationDetails() {
+				rfc9396Requester.GrantAuthorizationDetail(ad)
+			}
+		}
 	}
 
 	access, accessSignature, err := c.AccessTokenStrategy.GenerateAccessToken(ctx, requester)

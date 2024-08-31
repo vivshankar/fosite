@@ -13,16 +13,18 @@ import (
 
 // Request is an implementation of Requester
 type Request struct {
-	ID                string       `json:"id" gorethink:"id"`
-	RequestedAt       time.Time    `json:"requestedAt" gorethink:"requestedAt"`
-	Client            Client       `json:"client" gorethink:"client"`
-	RequestedScope    Arguments    `json:"scopes" gorethink:"scopes"`
-	GrantedScope      Arguments    `json:"grantedScopes" gorethink:"grantedScopes"`
-	Form              url.Values   `json:"form" gorethink:"form"`
-	Session           Session      `json:"session" gorethink:"session"`
-	RequestedAudience Arguments    `json:"requestedAudience"`
-	GrantedAudience   Arguments    `json:"grantedAudience"`
-	Lang              language.Tag `json:"-"`
+	ID                            string                             `json:"id" gorethink:"id"`
+	RequestedAt                   time.Time                          `json:"requestedAt" gorethink:"requestedAt"`
+	Client                        Client                             `json:"client" gorethink:"client"`
+	RequestedScope                Arguments                          `json:"scopes" gorethink:"scopes"`
+	GrantedScope                  Arguments                          `json:"grantedScopes" gorethink:"grantedScopes"`
+	RequestedAuthorizationDetails []*RFC9396AuthorizationDetailsType `json:"ad" gorethink:"ad"`
+	GrantedAuthorizationDetails   []*RFC9396AuthorizationDetailsType `json:"gad" gorethink:"gad"`
+	Form                          url.Values                         `json:"form" gorethink:"form"`
+	Session                       Session                            `json:"session" gorethink:"session"`
+	RequestedAudience             Arguments                          `json:"requestedAudience"`
+	GrantedAudience               Arguments                          `json:"grantedAudience"`
+	Lang                          language.Tag                       `json:"-"`
 }
 
 func NewRequest() *Request {
@@ -71,6 +73,17 @@ func (a *Request) SetRequestedScopes(s Arguments) {
 	}
 }
 
+func (a *Request) GetRequestedAuthorizationDetails() []*RFC9396AuthorizationDetailsType {
+	return a.RequestedAuthorizationDetails
+}
+
+func (a *Request) SetRequestedAuthorizationDetails(types []*RFC9396AuthorizationDetailsType) {
+	a.RequestedAuthorizationDetails = nil
+	for _, ad := range types {
+		a.AppendRequestedAuthorizationDetail(ad)
+	}
+}
+
 func (a *Request) SetRequestedAudience(s Arguments) {
 	a.RequestedAudience = nil
 	for _, scope := range s {
@@ -85,6 +98,15 @@ func (a *Request) AppendRequestedScope(scope string) {
 		}
 	}
 	a.RequestedScope = append(a.RequestedScope, scope)
+}
+
+func (a *Request) AppendRequestedAuthorizationDetail(ad *RFC9396AuthorizationDetailsType) {
+	for _, has := range a.RequestedAuthorizationDetails {
+		if has.Equals(ad) {
+			return
+		}
+	}
+	a.RequestedAuthorizationDetails = append(a.RequestedAuthorizationDetails, ad)
 }
 
 func (a *Request) AppendRequestedAudience(audience string) {
@@ -126,6 +148,21 @@ func (a *Request) GrantScope(scope string) {
 	a.GrantedScope = append(a.GrantedScope, scope)
 }
 
+// GetGrantedAuthorizationDetails returns all granted authorization details.
+func (a *Request) GetGrantedAuthorizationDetails() []*RFC9396AuthorizationDetailsType {
+	return a.GrantedAuthorizationDetails
+}
+
+// GrantAuthorizationDetail marks a request's authorization detail as granted.
+func (a *Request) GrantAuthorizationDetail(ad *RFC9396AuthorizationDetailsType) {
+	for _, has := range a.GrantedAuthorizationDetails {
+		if has.Equals(ad) {
+			return
+		}
+	}
+	a.GrantedAuthorizationDetails = append(a.GrantedAuthorizationDetails, ad)
+}
+
 func (a *Request) SetSession(session Session) {
 	a.Session = session
 }
@@ -147,6 +184,15 @@ func (a *Request) Merge(request Requester) {
 	}
 	for _, aud := range request.GetGrantedAudience() {
 		a.GrantAudience(aud)
+	}
+
+	if rfc9396Requester, ok := request.(RFC9396Requester); ok {
+		for _, ad := range rfc9396Requester.GetRequestedAuthorizationDetails() {
+			a.AppendRequestedAuthorizationDetail(ad)
+		}
+		for _, ad := range rfc9396Requester.GetGrantedAuthorizationDetails() {
+			a.GrantAuthorizationDetail(ad)
+		}
 	}
 
 	a.ID = request.GetID()

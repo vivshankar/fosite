@@ -65,6 +65,15 @@ func (f *Fosite) NewDeviceAuthorizeRequest(ctx context.Context, req *http.Reques
 		return nil, err
 	}
 
+	// any additional validation and enrichment
+	if configProvider, ok := f.Config.(DeviceAuthorizeEndpointValidationHandlersProvider); ok {
+		for _, handler := range configProvider.GetDeviceAuthorizeEndpointValidationHandlers(ctx) {
+			if err := handler.ValidateDeviceAuthorizeEndpointRequest(ctx, request); err != nil {
+				return request, err
+			}
+		}
+	}
+
 	return request, nil
 }
 

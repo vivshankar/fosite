@@ -6,6 +6,7 @@ package oauth2
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -138,6 +139,53 @@ func (c *RefreshTokenGrantHandler) HandleTokenEndpointRequest(ctx context.Contex
 	rtLifespan := fosite.GetEffectiveLifespan(request.GetClient(), fosite.GrantTypeRefreshToken, fosite.RefreshToken, c.Config.GetRefreshTokenLifespan(ctx))
 	if rtLifespan > -1 {
 		request.GetSession().SetExpiresAt(fosite.RefreshToken, time.Now().UTC().Add(rtLifespan).Round(time.Second))
+	}
+
+	if err := c.handleAuthorizationDetails(ctx, request, originalRequest); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *RefreshTokenGrantHandler) handleAuthorizationDetails(ctx context.Context, requester fosite.AccessRequester, originalRequest fosite.Requester) error {
+	rfc9396Requester, _ := requester.(fosite.RFC9396Requester)
+	rfc9396OriginalRequest, _ := originalRequest.(fosite.RFC9396Requester)
+	config, _ := c.Config.(fosite.RFC9396ConfigProvider)
+
+	if rfc9396Requester == nil || rfc9396OriginalRequest == nil || config == nil {
+		return nil
+	}
+
+	if len(rfc9396Requester.GetRequestedAuthorizationDetails()) == 0 {
+		// if nothing is requested, grant everything in the original request. This matches how scopes are handled.
+		rfc9396Requester.SetRequestedAuthorizationDetails(rfc9396OriginalRequest.GetGrantedAuthorizationDetails())
+		for _, ad := range rfc9396OriginalRequest.GetGrantedAuthorizationDetails() {
+			rfc9396Requester.GrantAuthorizationDetail(ad)
+		}
+
+		return nil
+	}
+
+	granted := rfc9396OriginalRequest.GetGrantedAuthorizationDetails()
+	strategy := config.GetAuthorizationDetailsStrategy(ctx)
+	client, _ := requester.GetClient().(fosite.RFC9396Client)
+	for _, ad := range rfc9396Requester.GetRequestedAuthorizationDetails() {
+		if !slices.ContainsFunc(granted, func(v *fosite.RFC9396AuthorizationDetailsType) bool {
+			return ad.Equals(v)
+		}) {
+			if c.IgnoreRequestedScopeNotInOriginalGrant {
+				continue
+			}
+
+			return errorsx.WithStack(fosite.ErrInvalidAuthorizationDetails.WithHintf("The requested authorization detail '%s' was not originally granted by the resource owner.", ad.Type))
+		}
+
+		if client != nil && strategy != nil && !strategy(client.GetAuthorizationDetailTypes(), ad.Type) {
+			return errorsx.WithStack(fosite.ErrInvalidScope.WithHintf("The OAuth 2.0 Client is not allowed to request authorization details of type '%s'.", ad.Type))
+		}
+
+		rfc9396Requester.GrantAuthorizationDetail(ad)
 	}
 
 	return nil

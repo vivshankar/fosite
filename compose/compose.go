@@ -41,6 +41,9 @@ func Compose(config *fosite.Config, storage interface{}, strategy interface{}, f
 		if ah, ok := res.(fosite.AuthorizeEndpointHandler); ok {
 			config.AuthorizeEndpointHandlers.Append(ah)
 		}
+		if ah, ok := res.(fosite.AuthorizeEndpointValidationHandler); ok {
+			config.AuthorizeEndpointValidationHandlers.Append(ah)
+		}
 		if th, ok := res.(fosite.TokenEndpointHandler); ok {
 			config.TokenEndpointHandlers.Append(th)
 		}
@@ -55,6 +58,9 @@ func Compose(config *fosite.Config, storage interface{}, strategy interface{}, f
 		}
 		if dh, ok := res.(fosite.DeviceAuthorizeEndpointHandler); ok {
 			config.DeviceAuthorizeEndpointHandlers.Append(dh)
+		}
+		if dh, ok := res.(fosite.DeviceAuthorizeEndpointValidationHandler); ok {
+			config.DeviceAuthorizeEndpointValidationHandlers.Append(dh)
 		}
 		if uh, ok := res.(fosite.RFC8628UserAuthorizeEndpointHandler); ok {
 			config.RFC8628UserAuthorizeEndpointHandlers.Append(uh)

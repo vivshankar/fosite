@@ -22,6 +22,12 @@ type AuthorizeEndpointHandler interface {
 	HandleAuthorizeEndpointRequest(ctx context.Context, requester AuthorizeRequester, responder AuthorizeResponder) error
 }
 
+type AuthorizeEndpointValidationHandler interface {
+	// ValidateAuthorizeEndpointRequest validates and enriches an authorize endpoint request. This mirrors TokenEndpointHandler's
+	// HandleTokenEndpointRequest, which is used for the same purpose.
+	ValidateAuthorizeEndpointRequest(ctx context.Context, requester AuthorizeRequester) error
+}
+
 type TokenEndpointHandler interface {
 	// PopulateTokenEndpointResponse is responsible for setting return values and should only be executed if
 	// the handler's HandleTokenEndpointRequest did not return ErrUnknownRequest.
@@ -75,6 +81,12 @@ type DeviceAuthorizeEndpointHandler interface {
 	// The following spec is a good example of what HandleDeviceAuthorizeRequest should do.
 	// * https://tools.ietf.org/html/rfc8628#section-3.2
 	HandleDeviceAuthorizeEndpointRequest(ctx context.Context, requester DeviceAuthorizeRequester, responder DeviceAuthorizeResponder) error
+}
+
+type DeviceAuthorizeEndpointValidationHandler interface {
+	// ValidateDeviceAuthorizeEndpointRequest validates and enriches an authorize endpoint request. This mirrors TokenEndpointHandler's
+	// HandleTokenEndpointRequest, which is used for the same purpose.
+	ValidateDeviceAuthorizeEndpointRequest(ctx context.Context, requester DeviceAuthorizeRequester) error
 }
 
 type RFC8628UserAuthorizeEndpointHandler interface {
