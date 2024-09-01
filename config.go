@@ -1,4 +1,4 @@
-// Copyright © 2023 Ory Corp
+// Copyright © 2024 Ory Corp
 // SPDX-License-Identifier: Apache-2.0
 
 package fosite
@@ -32,6 +32,12 @@ type RefreshTokenLifespanProvider interface {
 type AccessTokenLifespanProvider interface {
 	// GetAccessTokenLifespan returns the access token lifespan.
 	GetAccessTokenLifespan(ctx context.Context) time.Duration
+}
+
+// VerifiableCredentialsNonceLifespanProvider returns the provider for configuring the access token lifespan.
+type VerifiableCredentialsNonceLifespanProvider interface {
+	// GetNonceLifespan returns the nonce lifespan.
+	GetVerifiableCredentialsNonceLifespan(ctx context.Context) time.Duration
 }
 
 // IDTokenLifespanProvider returns the provider for configuring the ID token lifespan.
@@ -241,8 +247,8 @@ type FormPostHTMLTemplateProvider interface {
 }
 
 type TokenURLProvider interface {
-	// GetTokenURL returns the token URL.
-	GetTokenURL(ctx context.Context) string
+	// GetTokenURLs returns the token URL.
+	GetTokenURLs(ctx context.Context) []string
 }
 
 // AuthorizeEndpointHandlersProvider returns the provider for configuring the authorize endpoint handlers.
@@ -267,6 +273,29 @@ type TokenIntrospectionHandlersProvider interface {
 type RevocationHandlersProvider interface {
 	// GetRevocationHandlers returns the revocation handlers.
 	GetRevocationHandlers(ctx context.Context) RevocationHandlers
+}
+
+// DeviceAuthorizeEndpointHandlersProvider returns the provider for setting up the Device authorization handlers.
+type DeviceAuthorizeEndpointHandlersProvider interface {
+	// GetDeviceAuthorizeEndpointHandlers returns the handlers.
+	GetDeviceAuthorizeEndpointHandlers(ctx context.Context) DeviceAuthorizeEndpointHandlers
+}
+
+// RFC8628UserAuthorizeEndpointHandlersProvider returns the provider for setting up the Device grant user interaction handlers.
+type RFC8628UserAuthorizeEndpointHandlersProvider interface {
+
+	// GetRFC8628UserAuthorizeEndpointHandlers returns the handlers.
+	GetRFC8628UserAuthorizeEndpointHandlers(ctx context.Context) RFC8628UserAuthorizeEndpointHandlers
+}
+
+// DeviceAuthorizeConfigProvider returns the provider for configuring the device authorization response
+// (see https://www.rfc-editor.org/rfc/rfc8628#section-3.2)
+type DeviceAuthorizeConfigProvider interface {
+	// GetDeviceAndUserCodeLifespan returns the device and user code lifespan.
+	GetDeviceAndUserCodeLifespan(ctx context.Context) time.Duration
+	GetRFC8628UserVerificationURL(ctx context.Context) string
+	GetDeviceAuthTokenPollingInterval(ctx context.Context) time.Duration
+	ShouldAuthenticateClientOnDeviceAuthorize(ctx context.Context) bool
 }
 
 // PushedAuthorizeEndpointHandlersProvider returns the provider for configuring the PAR handlers.
@@ -305,4 +334,23 @@ type RFC8693ConfigProvider interface {
 	GetTokenTypes(ctx context.Context) map[string]RFC8693TokenType
 
 	GetDefaultRequestedTokenType(ctx context.Context) string
+}
+
+// JWTValidationTimeSkewConfigProvider is configuration provider for JWT validation time skew.
+type JWTValidationTimeSkewConfigProvider interface {
+	// GetRequestObjectValidationTimeSkew is validation time skew for request object JWT 'iat', 'exp' and 'nbf'.
+	// For dcr, par or authorize.
+	GetRequestObjectValidationTimeSkew(ctx context.Context) time.Duration
+
+	// GetClientAssertionValidationTimeSkew is validation time skew for client assertion JWT 'iat', 'exp' and 'nbf'.
+	// For client authentication.
+	GetClientAssertionValidationTimeSkew(ctx context.Context) time.Duration
+
+	// GetJWTBearerValidationTimeSkew is validation time skew for JWT bearer 'iat', 'exp' and 'nbf'.
+	// For jwt bearer flow.
+	GetJWTBearerValidationTimeSkew(ctx context.Context) time.Duration
+
+	// GetJWTTokenValidationTimeSkew is validation time skew for JWT token 'iat', 'exp' and 'nbf.
+	// For token exchange flow.
+	GetJWTTokenValidationTimeSkew(ctx context.Context) time.Duration
 }

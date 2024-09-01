@@ -143,6 +143,7 @@ func (c *IDTokenTypeHandler) issue(ctx context.Context, request fosite.AccessReq
 
 	response.SetAccessToken(token)
 	response.SetTokenType("N_A")
+	response.SetExtra("issued_token_type", IDTokenType)
 
 	return nil
 }

@@ -1,4 +1,4 @@
-// Copyright © 2023 Ory Corp
+// Copyright © 2024 Ory Corp
 // SPDX-License-Identifier: Apache-2.0
 
 package fosite
@@ -42,4 +42,17 @@ func EscapeJSONString(str string) string {
 	// Escape quotation mark.
 	str = strings.ReplaceAll(str, `"`, `\"`)
 	return str
+}
+
+func DeviceAuthorizeStatusToString(status DeviceAuthorizeStatus) string {
+	switch status {
+	case DeviceAuthorizeStatusApproved:
+		return "Approved"
+	case DeviceAuthorizeStatusDenied:
+		return "Denied"
+	case DeviceAuthorizeStatusNew:
+		return "New"
+	default:
+		return "Invalid"
+	}
 }

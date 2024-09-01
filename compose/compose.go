@@ -1,4 +1,4 @@
-// Copyright © 2023 Ory Corp
+// Copyright © 2024 Ory Corp
 // SPDX-License-Identifier: Apache-2.0
 
 package compose
@@ -53,6 +53,12 @@ func Compose(config *fosite.Config, storage interface{}, strategy interface{}, f
 		if ph, ok := res.(fosite.PushedAuthorizeEndpointHandler); ok {
 			config.PushedAuthorizeEndpointHandlers.Append(ph)
 		}
+		if dh, ok := res.(fosite.DeviceAuthorizeEndpointHandler); ok {
+			config.DeviceAuthorizeEndpointHandlers.Append(dh)
+		}
+		if uh, ok := res.(fosite.RFC8628UserAuthorizeEndpointHandler); ok {
+			config.RFC8628UserAuthorizeEndpointHandlers.Append(uh)
+		}
 	}
 
 	return f
@@ -68,6 +74,7 @@ func ComposeAllEnabled(config *fosite.Config, storage interface{}, key interface
 		storage,
 		&CommonStrategy{
 			CoreStrategy:               NewOAuth2HMACStrategy(config),
+			RFC8628CodeStrategy:        NewDeviceStrategy(config),
 			OpenIDConnectTokenStrategy: NewOpenIDConnectStrategy(keyGetter, config),
 			Signer:                     &jwt.DefaultSigner{GetPrivateKey: keyGetter},
 		},

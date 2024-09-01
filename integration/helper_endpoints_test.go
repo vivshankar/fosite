@@ -1,4 +1,4 @@
-// Copyright © 2023 Ory Corp
+// Copyright © 2024 Ory Corp
 // SPDX-License-Identifier: Apache-2.0
 
 package integration_test
@@ -15,10 +15,6 @@ import (
 	"github.com/ory/fosite"
 	"github.com/ory/fosite/handler/oauth2"
 )
-
-type stackTracer interface {
-	StackTrace() errors.StackTrace
-}
 
 func tokenRevocationHandler(t *testing.T, oauth2 fosite.OAuth2Provider, session fosite.Session) func(rw http.ResponseWriter, req *http.Request) {
 	return func(rw http.ResponseWriter, req *http.Request) {
@@ -77,8 +73,22 @@ func authEndpointHandler(t *testing.T, oauth2 fosite.OAuth2Provider, session fos
 			return
 		}
 
-		if ar.GetRequestedScopes().Has("fosite") {
-			ar.GrantScope("fosite")
+		if ar.GetClient().GetID() == "grant-all-requested-scopes-client" {
+			for _, scope := range ar.GetRequestedScopes() {
+				ar.GrantScope(scope)
+			}
+		} else {
+			if ar.GetRequestedScopes().Has("fosite") {
+				ar.GrantScope("fosite")
+			}
+
+			if ar.GetRequestedScopes().Has("offline") {
+				ar.GrantScope("offline")
+			}
+
+			if ar.GetRequestedScopes().Has("openid") {
+				ar.GrantScope("openid")
+			}
 		}
 
 		if ar.GetRequestedScopes().Has("offline") {
@@ -146,7 +156,7 @@ func tokenEndpointHandler(t *testing.T, provider fosite.OAuth2Provider) func(rw 
 
 		response, err := provider.NewAccessResponse(ctx, accessRequest)
 		if err != nil {
-			t.Logf("Access request failed because: %+v", err)
+			t.Logf("Access request failed because: %+v", fosite.ErrorToRFC6749Error(err).WithExposeDebug(true).GetDescription())
 			t.Logf("Request: %+v", accessRequest)
 			provider.WriteAccessError(req.Context(), rw, accessRequest, err)
 			return

@@ -101,6 +101,8 @@ func (c *CustomJWTTypeHandler) PopulateTokenEndpointResponse(ctx context.Context
 		return err
 	}
 
+	responder.SetExtra("issued_token_type", requestedTokenType)
+
 	return nil
 }
 

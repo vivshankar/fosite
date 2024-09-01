@@ -140,7 +140,10 @@ func (c *AccessTokenTypeHandler) validate(ctx context.Context, request fosite.Ac
 	}
 
 	// Convert to flat session with only access token claims
-	tokenObject := session.AccessTokenClaimsMap()
+	tokenObject := make(map[string]interface{})
+	if os, ok := or.GetSession().(Session); ok {
+		tokenObject = os.AccessTokenClaimsMap()
+	}
 	tokenObject["client_id"] = or.GetClient().GetID()
 	tokenObject["scope"] = or.GetGrantedScopes()
 	tokenObject["aud"] = or.GetGrantedAudience()
@@ -182,6 +185,7 @@ func (c *AccessTokenTypeHandler) issue(ctx context.Context, request fosite.Acces
 	response.SetTokenType("bearer")
 	response.SetExpiresIn(c.getExpiresIn(request, fosite.AccessToken, c.Config.GetAccessTokenLifespan(ctx), time.Now().UTC()))
 	response.SetScopes(request.GetGrantedScopes())
+	response.SetExtra("issued_token_type", AccessTokenType)
 
 	return nil
 }

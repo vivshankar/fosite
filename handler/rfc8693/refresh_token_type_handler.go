@@ -142,7 +142,10 @@ func (c *RefreshTokenTypeHandler) validate(ctx context.Context, request fosite.A
 	}
 
 	// Convert to flat session with only access token claims
-	tokenObject := session.AccessTokenClaimsMap()
+	tokenObject := make(map[string]interface{})
+	if os, ok := or.GetSession().(Session); ok {
+		tokenObject = os.AccessTokenClaimsMap()
+	}
 	tokenObject["client_id"] = or.GetClient().GetID()
 	tokenObject["scope"] = or.GetGrantedScopes()
 	tokenObject["aud"] = or.GetGrantedAudience()
@@ -172,6 +175,7 @@ func (c *RefreshTokenTypeHandler) issue(ctx context.Context, request fosite.Acce
 	response.SetTokenType("N_A")
 	response.SetExpiresIn(c.getExpiresIn(request, fosite.RefreshToken, c.Config.GetRefreshTokenLifespan(ctx), time.Now().UTC()))
 	response.SetScopes(request.GetGrantedScopes())
+	response.SetExtra("issued_token_type", RefreshTokenType)
 
 	return nil
 }

@@ -1,4 +1,4 @@
-// Copyright © 2023 Ory Corp
+// Copyright © 2024 Ory Corp
 // SPDX-License-Identifier: Apache-2.0
 
 package fosite
@@ -62,11 +62,19 @@ var (
 	_ RevocationHandlersProvider                   = (*Config)(nil)
 	_ PushedAuthorizeRequestHandlersProvider       = (*Config)(nil)
 	_ PushedAuthorizeRequestConfigProvider         = (*Config)(nil)
+	_ RFC8693ConfigProvider                        = (*Config)(nil)
+	_ DeviceAuthorizeEndpointHandlersProvider      = (*Config)(nil)
+	_ RFC8628UserAuthorizeEndpointHandlersProvider = (*Config)(nil)
+	_ DeviceAuthorizeConfigProvider                = (*Config)(nil)
+	_ JWTValidationTimeSkewConfigProvider          = (*Config)(nil)
 )
 
 type Config struct {
 	// AccessTokenLifespan sets how long an access token is going to be valid. Defaults to one hour.
 	AccessTokenLifespan time.Duration
+
+	// VerifiableCredentialsNonceLifespan sets how long a verifiable credentials nonce is going to be valid. Defaults to one hour.
+	VerifiableCredentialsNonceLifespan time.Duration
 
 	// RefreshTokenLifespan sets how long a refresh token is going to be valid. Defaults to 30 days. Set to -1 for
 	// refresh tokens that never expire.
@@ -74,6 +82,21 @@ type Config struct {
 
 	// AuthorizeCodeLifespan sets how long an authorize code is going to be valid. Defaults to fifteen minutes.
 	AuthorizeCodeLifespan time.Duration
+
+	// Sets how long a device user/device code pair is valid for
+	DeviceAndUserCodeLifespan time.Duration
+
+	// RFC8628UserVerificationURL is the URL of the device verification endpoint, this is is included with the device code request responses
+	RFC8628UserVerificationURL string
+
+	// DeviceAuthTokenPollingInterval sets the interval that clients should check for device code grants
+	DeviceAuthTokenPollingInterval time.Duration
+
+	// DeviceAuthorizeEndpointHandlers is a list of handlers that are called before the device authorization endpoint is served.
+	DeviceAuthorizeEndpointHandlers DeviceAuthorizeEndpointHandlers
+
+	// RFC8628UserAuthorizeEndpointHandlers is a list of handlers that are called before the device grant user interaction endpoint is served.
+	RFC8628UserAuthorizeEndpointHandlers RFC8628UserAuthorizeEndpointHandlers
 
 	// IDTokenLifespan sets the default id token lifetime. Defaults to one hour.
 	IDTokenLifespan time.Duration
@@ -216,6 +239,18 @@ type Config struct {
 	RFC8693TokenTypes map[string]RFC8693TokenType
 
 	DefaultRequestedTokenType string
+
+	// RequestObjectValidationTimeSkew is validation time skew for request object JWT 'iat', 'exp' and 'nbf'.
+	RequestObjectValidationTimeSkew time.Duration
+
+	// ClientAssertionValidationTimeSkew is validation time skew for client assertion JWT 'iat', 'exp' and 'nbf'.
+	ClientAssertionValidationTimeSkew time.Duration
+
+	// JWTBearerValidationTimeSkew is validation time skew for JWT bearer 'iat', 'exp' and 'nbf'.
+	JWTBearerValidationTimeSkew time.Duration
+
+	// JWTTokenValidationTimeSkew is validation time skew for JWT token 'iat', 'exp' and 'nbf.
+	JWTTokenValidationTimeSkew time.Duration
 }
 
 func (c *Config) GetGlobalSecret(ctx context.Context) ([]byte, error) {
@@ -264,8 +299,8 @@ func (c *Config) GetSecretsHasher(ctx context.Context) Hasher {
 	return c.ClientSecretsHasher
 }
 
-func (c *Config) GetTokenURL(ctx context.Context) string {
-	return c.TokenURL
+func (c *Config) GetTokenURLs(ctx context.Context) []string {
+	return []string{c.TokenURL}
 }
 
 func (c *Config) GetFormPostHTMLTemplate(ctx context.Context) *template.Template {
@@ -356,6 +391,14 @@ func (c *Config) GetAudienceStrategy(_ context.Context) AudienceMatchingStrategy
 	return c.AudienceMatchingStrategy
 }
 
+func (c *Config) GetDeviceAuthorizeEndpointHandlers(_ context.Context) DeviceAuthorizeEndpointHandlers {
+	return c.DeviceAuthorizeEndpointHandlers
+}
+
+func (c *Config) GetRFC8628UserAuthorizeEndpointHandlers(_ context.Context) RFC8628UserAuthorizeEndpointHandlers {
+	return c.RFC8628UserAuthorizeEndpointHandlers
+}
+
 // GetAuthorizeCodeLifespan returns how long an authorize code should be valid. Defaults to one fifteen minutes.
 func (c *Config) GetAuthorizeCodeLifespan(_ context.Context) time.Duration {
 	if c.AuthorizeCodeLifespan == 0 {
@@ -364,7 +407,15 @@ func (c *Config) GetAuthorizeCodeLifespan(_ context.Context) time.Duration {
 	return c.AuthorizeCodeLifespan
 }
 
-// GeIDTokenLifespan returns how long an id token should be valid. Defaults to one hour.
+// GetDeviceAndUserCodeLifespan returns the device and user code lifespan.
+func (c *Config) GetDeviceAndUserCodeLifespan(_ context.Context) time.Duration {
+	if c.DeviceAndUserCodeLifespan == 0 {
+		return time.Minute * 10
+	}
+	return c.DeviceAndUserCodeLifespan
+}
+
+// GetIDTokenLifespan returns how long an id token should be valid. Defaults to one hour.
 func (c *Config) GetIDTokenLifespan(_ context.Context) time.Duration {
 	if c.IDTokenLifespan == 0 {
 		return time.Hour
@@ -380,6 +431,14 @@ func (c *Config) GetAccessTokenLifespan(_ context.Context) time.Duration {
 	return c.AccessTokenLifespan
 }
 
+// GetNonceLifespan returns how long a nonce should be valid. Defaults to one hour.
+func (c *Config) GetVerifiableCredentialsNonceLifespan(_ context.Context) time.Duration {
+	if c.VerifiableCredentialsNonceLifespan == 0 {
+		return time.Hour
+	}
+	return c.VerifiableCredentialsNonceLifespan
+}
+
 // GetRefreshTokenLifespan sets how long a refresh token is going to be valid. Defaults to 30 days. Set to -1 for
 // refresh tokens that never expire.
 func (c *Config) GetRefreshTokenLifespan(_ context.Context) time.Duration {
@@ -389,7 +448,7 @@ func (c *Config) GetRefreshTokenLifespan(_ context.Context) time.Duration {
 	return c.RefreshTokenLifespan
 }
 
-// GetHashCost returns the bcrypt cost factor. Defaults to 12.
+// GetBCryptCost returns the bcrypt cost factor. Defaults to 12.
 func (c *Config) GetBCryptCost(_ context.Context) int {
 	if c.HashCost == 0 {
 		return DefaultBCryptWorkFactor
@@ -499,4 +558,35 @@ func (c *Config) GetTokenTypes(ctx context.Context) map[string]RFC8693TokenType 
 
 func (c *Config) GetDefaultRequestedTokenType(ctx context.Context) string {
 	return c.DefaultRequestedTokenType
+}
+
+func (c *Config) GetRFC8628UserVerificationURL(_ context.Context) string {
+	return c.RFC8628UserVerificationURL
+}
+
+func (c *Config) GetDeviceAuthTokenPollingInterval(_ context.Context) time.Duration {
+	if c.DeviceAuthTokenPollingInterval == 0 {
+		return time.Second * 10
+	}
+	return c.DeviceAuthTokenPollingInterval
+}
+
+func (c *Config) ShouldAuthenticateClientOnDeviceAuthorize(_ context.Context) bool {
+	return true
+}
+
+func (c *Config) GetRequestObjectValidationTimeSkew(_ context.Context) time.Duration {
+	return c.RequestObjectValidationTimeSkew
+}
+
+func (c *Config) GetClientAssertionValidationTimeSkew(_ context.Context) time.Duration {
+	return c.ClientAssertionValidationTimeSkew
+}
+
+func (c *Config) GetJWTBearerValidationTimeSkew(_ context.Context) time.Duration {
+	return c.JWTBearerValidationTimeSkew
+}
+
+func (c *Config) GetJWTTokenValidationTimeSkew(_ context.Context) time.Duration {
+	return c.JWTTokenValidationTimeSkew
 }
