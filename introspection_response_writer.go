@@ -226,6 +226,13 @@ func (f *Fosite) WriteIntrospectionResponse(ctx context.Context, rw http.Respons
 		response["username"] = r.GetAccessRequester().GetSession().GetUsername()
 	}
 
+	if rfc9396Requester, ok := r.GetAccessRequester().(RFC9396Requester); ok {
+		ad := rfc9396Requester.GetGrantedAuthorizationDetails()
+		if len(ad) > 0 {
+			response["authorization_details"] = ad
+		}
+	}
+
 	rw.Header().Set("Content-Type", "application/json;charset=UTF-8")
 	rw.Header().Set("Cache-Control", "no-store")
 	rw.Header().Set("Pragma", "no-cache")
