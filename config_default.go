@@ -23,50 +23,53 @@ const (
 )
 
 var (
-	_ AuthorizeCodeLifespanProvider                = (*Config)(nil)
-	_ RefreshTokenLifespanProvider                 = (*Config)(nil)
-	_ AccessTokenLifespanProvider                  = (*Config)(nil)
-	_ ScopeStrategyProvider                        = (*Config)(nil)
-	_ AudienceStrategyProvider                     = (*Config)(nil)
-	_ RedirectSecureCheckerProvider                = (*Config)(nil)
-	_ RefreshTokenScopesProvider                   = (*Config)(nil)
-	_ DisableRefreshTokenValidationProvider        = (*Config)(nil)
-	_ AccessTokenIssuerProvider                    = (*Config)(nil)
-	_ JWTScopeFieldProvider                        = (*Config)(nil)
-	_ AllowedPromptsProvider                       = (*Config)(nil)
-	_ OmitRedirectScopeParamProvider               = (*Config)(nil)
-	_ MinParameterEntropyProvider                  = (*Config)(nil)
-	_ SanitationAllowedProvider                    = (*Config)(nil)
-	_ EnforcePKCEForPublicClientsProvider          = (*Config)(nil)
-	_ EnablePKCEPlainChallengeMethodProvider       = (*Config)(nil)
-	_ EnforcePKCEProvider                          = (*Config)(nil)
-	_ GrantTypeJWTBearerCanSkipClientAuthProvider  = (*Config)(nil)
-	_ GrantTypeJWTBearerIDOptionalProvider         = (*Config)(nil)
-	_ GrantTypeJWTBearerIssuedDateOptionalProvider = (*Config)(nil)
-	_ GetJWTMaxDurationProvider                    = (*Config)(nil)
-	_ IDTokenLifespanProvider                      = (*Config)(nil)
-	_ IDTokenIssuerProvider                        = (*Config)(nil)
-	_ JWKSFetcherStrategyProvider                  = (*Config)(nil)
-	_ ClientAuthenticationStrategyProvider         = (*Config)(nil)
-	_ SendDebugMessagesToClientsProvider           = (*Config)(nil)
-	_ ResponseModeHandlerExtensionProvider         = (*Config)(nil)
-	_ MessageCatalogProvider                       = (*Config)(nil)
-	_ FormPostHTMLTemplateProvider                 = (*Config)(nil)
-	_ TokenURLProvider                             = (*Config)(nil)
-	_ GetSecretsHashingProvider                    = (*Config)(nil)
-	_ HTTPClientProvider                           = (*Config)(nil)
-	_ HMACHashingProvider                          = (*Config)(nil)
-	_ AuthorizeEndpointHandlersProvider            = (*Config)(nil)
-	_ TokenEndpointHandlersProvider                = (*Config)(nil)
-	_ TokenIntrospectionHandlersProvider           = (*Config)(nil)
-	_ RevocationHandlersProvider                   = (*Config)(nil)
-	_ PushedAuthorizeRequestHandlersProvider       = (*Config)(nil)
-	_ PushedAuthorizeRequestConfigProvider         = (*Config)(nil)
-	_ RFC8693ConfigProvider                        = (*Config)(nil)
-	_ DeviceAuthorizeEndpointHandlersProvider      = (*Config)(nil)
-	_ RFC8628UserAuthorizeEndpointHandlersProvider = (*Config)(nil)
-	_ DeviceAuthorizeConfigProvider                = (*Config)(nil)
-	_ JWTValidationTimeSkewConfigProvider          = (*Config)(nil)
+	_ AuthorizeCodeLifespanProvider                     = (*Config)(nil)
+	_ RefreshTokenLifespanProvider                      = (*Config)(nil)
+	_ AccessTokenLifespanProvider                       = (*Config)(nil)
+	_ ScopeStrategyProvider                             = (*Config)(nil)
+	_ AudienceStrategyProvider                          = (*Config)(nil)
+	_ RedirectSecureCheckerProvider                     = (*Config)(nil)
+	_ RefreshTokenScopesProvider                        = (*Config)(nil)
+	_ DisableRefreshTokenValidationProvider             = (*Config)(nil)
+	_ AccessTokenIssuerProvider                         = (*Config)(nil)
+	_ JWTScopeFieldProvider                             = (*Config)(nil)
+	_ AllowedPromptsProvider                            = (*Config)(nil)
+	_ OmitRedirectScopeParamProvider                    = (*Config)(nil)
+	_ MinParameterEntropyProvider                       = (*Config)(nil)
+	_ SanitationAllowedProvider                         = (*Config)(nil)
+	_ EnforcePKCEForPublicClientsProvider               = (*Config)(nil)
+	_ EnablePKCEPlainChallengeMethodProvider            = (*Config)(nil)
+	_ EnforcePKCEProvider                               = (*Config)(nil)
+	_ GrantTypeJWTBearerCanSkipClientAuthProvider       = (*Config)(nil)
+	_ GrantTypeJWTBearerIDOptionalProvider              = (*Config)(nil)
+	_ GrantTypeJWTBearerIssuedDateOptionalProvider      = (*Config)(nil)
+	_ GetJWTMaxDurationProvider                         = (*Config)(nil)
+	_ IDTokenLifespanProvider                           = (*Config)(nil)
+	_ IDTokenIssuerProvider                             = (*Config)(nil)
+	_ JWKSFetcherStrategyProvider                       = (*Config)(nil)
+	_ ClientAuthenticationStrategyProvider              = (*Config)(nil)
+	_ SendDebugMessagesToClientsProvider                = (*Config)(nil)
+	_ ResponseModeHandlerExtensionProvider              = (*Config)(nil)
+	_ MessageCatalogProvider                            = (*Config)(nil)
+	_ FormPostHTMLTemplateProvider                      = (*Config)(nil)
+	_ TokenURLProvider                                  = (*Config)(nil)
+	_ GetSecretsHashingProvider                         = (*Config)(nil)
+	_ HTTPClientProvider                                = (*Config)(nil)
+	_ HMACHashingProvider                               = (*Config)(nil)
+	_ AuthorizeEndpointHandlersProvider                 = (*Config)(nil)
+	_ AuthorizeEndpointValidationHandlersProvider       = (*Config)(nil)
+	_ TokenEndpointHandlersProvider                     = (*Config)(nil)
+	_ TokenIntrospectionHandlersProvider                = (*Config)(nil)
+	_ RevocationHandlersProvider                        = (*Config)(nil)
+	_ PushedAuthorizeRequestHandlersProvider            = (*Config)(nil)
+	_ PushedAuthorizeRequestConfigProvider              = (*Config)(nil)
+	_ RFC8693ConfigProvider                             = (*Config)(nil)
+	_ DeviceAuthorizeEndpointHandlersProvider           = (*Config)(nil)
+	_ DeviceAuthorizeEndpointValidationHandlersProvider = (*Config)(nil)
+	_ RFC8628UserAuthorizeEndpointHandlersProvider      = (*Config)(nil)
+	_ DeviceAuthorizeConfigProvider                     = (*Config)(nil)
+	_ JWTValidationTimeSkewConfigProvider               = (*Config)(nil)
+	_ RFC9396ConfigProvider                             = (*Config)(nil)
 )
 
 type Config struct {
@@ -94,6 +97,9 @@ type Config struct {
 
 	// DeviceAuthorizeEndpointHandlers is a list of handlers that are called before the device authorization endpoint is served.
 	DeviceAuthorizeEndpointHandlers DeviceAuthorizeEndpointHandlers
+
+	// DeviceAuthorizeEndpointValidationHandlers is a list of handlers that are called to validate and enrich the request.
+	DeviceAuthorizeEndpointValidationHandlers DeviceAuthorizeEndpointValidationHandlers
 
 	// RFC8628UserAuthorizeEndpointHandlers is a list of handlers that are called before the device grant user interaction endpoint is served.
 	RFC8628UserAuthorizeEndpointHandlers RFC8628UserAuthorizeEndpointHandlers
@@ -205,6 +211,9 @@ type Config struct {
 	// AuthorizeEndpointHandlers is a list of handlers that are called before the authorization endpoint is served.
 	AuthorizeEndpointHandlers AuthorizeEndpointHandlers
 
+	// AuthorizeEndpointValidationHandlers is a list of handlers that are called to validate the authorization endpoint request.
+	AuthorizeEndpointValidationHandlers AuthorizeEndpointValidationHandlers
+
 	// TokenEndpointHandlers is a list of handlers that are called before the token endpoint is served.
 	TokenEndpointHandlers TokenEndpointHandlers
 
@@ -251,6 +260,22 @@ type Config struct {
 
 	// JWTTokenValidationTimeSkew is validation time skew for JWT token 'iat', 'exp' and 'nbf.
 	JWTTokenValidationTimeSkew time.Duration
+
+	// AuthorizationDetailTypesSupported is the list of authorization detail types supported by the
+	// authorization server.
+	AuthorizationDetailTypesSupported []string
+
+	// AuthorizationDetailsTypeHandlers is a map of type-based handlers to override the default
+	// behaviour of RFC9396DefaultAuthorizationDetailsTypeHandler. This is specifically necessary when
+	// a type has additional properties that are not covered within the common properties specified in
+	// the standard.
+	AuthorizationDetailsTypeHandlers map[string]RFC9396AuthorizationDetailsTypeHandler
+
+	// AuthorizationDetailsStrategy sets the authorization details type strategy that is used
+	// to indicate if the type is allowed to be requested.
+	AuthorizationDetailsStrategy RFC9396AuthorizationDetailsStrategy
+
+	IgnoreUnknownAuthorizationDetailsType bool
 }
 
 func (c *Config) GetGlobalSecret(ctx context.Context) ([]byte, error) {
@@ -271,6 +296,10 @@ func (c *Config) GetHMACHasher(ctx context.Context) func() hash.Hash {
 
 func (c *Config) GetAuthorizeEndpointHandlers(ctx context.Context) AuthorizeEndpointHandlers {
 	return c.AuthorizeEndpointHandlers
+}
+
+func (c *Config) GetAuthorizeEndpointValidationHandlers(ctx context.Context) AuthorizeEndpointValidationHandlers {
+	return c.AuthorizeEndpointValidationHandlers
 }
 
 func (c *Config) GetTokenEndpointHandlers(ctx context.Context) TokenEndpointHandlers {
@@ -393,6 +422,10 @@ func (c *Config) GetAudienceStrategy(_ context.Context) AudienceMatchingStrategy
 
 func (c *Config) GetDeviceAuthorizeEndpointHandlers(_ context.Context) DeviceAuthorizeEndpointHandlers {
 	return c.DeviceAuthorizeEndpointHandlers
+}
+
+func (c *Config) GetDeviceAuthorizeEndpointValidationHandlers(_ context.Context) DeviceAuthorizeEndpointValidationHandlers {
+	return c.DeviceAuthorizeEndpointValidationHandlers
 }
 
 func (c *Config) GetRFC8628UserAuthorizeEndpointHandlers(_ context.Context) RFC8628UserAuthorizeEndpointHandlers {
@@ -589,4 +622,28 @@ func (c *Config) GetJWTBearerValidationTimeSkew(_ context.Context) time.Duration
 
 func (c *Config) GetJWTTokenValidationTimeSkew(_ context.Context) time.Duration {
 	return c.JWTTokenValidationTimeSkew
+}
+
+// GetAuthorizationDetailTypesSupported returns the list of authorization detail types supported by
+// the authorization server.
+func (c *Config) GetAuthorizationDetailTypesSupported(ctx context.Context) []string {
+	return c.AuthorizationDetailTypesSupported
+}
+
+// GetAuthorizationDetailTypeHandlers returns a set of type-based handlers to override the default
+// behaviour of RFC9396DefaultAuthorizationDetailsTypeHandler. This is specifically necessary when
+// a type has additional properties that are not covered within the common properties specified in
+// the standard.
+func (c *Config) GetAuthorizationDetailTypeHandlers(ctx context.Context) map[string]RFC9396AuthorizationDetailsTypeHandler {
+	return c.AuthorizationDetailsTypeHandlers
+}
+
+// GetAuthorizationDetailsStrategy returns a RFC9396AuthorizationDetailsStrategy.
+func (c *Config) GetAuthorizationDetailsStrategy(ctx context.Context) RFC9396AuthorizationDetailsStrategy {
+	return c.AuthorizationDetailsStrategy
+}
+
+// GetIgnoreUnknownAuthorizationDetailsType indicates if unknown authorization details should be ignored.
+func (c *Config) GetIgnoreUnknownAuthorizationDetailsType(ctx context.Context) bool {
+	return c.IgnoreUnknownAuthorizationDetailsType
 }

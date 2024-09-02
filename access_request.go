@@ -28,6 +28,10 @@ func (a *AccessRequest) SetGrantedScopes(scopes Arguments) {
 	a.GrantedScope = scopes
 }
 
+func (a *AccessRequest) SetGrantedAuthorizationDetails(types []*RFC9396AuthorizationDetailsType) {
+	a.GrantedAuthorizationDetails = types
+}
+
 func (a *AccessRequest) SanitizeRestoreRefreshTokenOriginalRequester(requester Requester) Requester {
 	r := a.Sanitize(nil).(*Request)
 
@@ -39,6 +43,11 @@ func (a *AccessRequest) SanitizeRestoreRefreshTokenOriginalRequester(requester R
 
 	ar.SetRequestedScopes(requester.GetRequestedScopes())
 	ar.SetGrantedScopes(requester.GetGrantedScopes())
+
+	if rfc9396Requester, ok := requester.(RFC9396Requester); ok {
+		ar.SetGrantedAuthorizationDetails(rfc9396Requester.GetGrantedAuthorizationDetails())
+		ar.SetRequestedAuthorizationDetails(rfc9396Requester.GetRequestedAuthorizationDetails())
+	}
 
 	return ar
 }
