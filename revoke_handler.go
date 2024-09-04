@@ -61,7 +61,7 @@ func (f *Fosite) NewRevocationRequest(ctx context.Context, r *http.Request) (err
 			found = true
 		} else if errors.Is(err, ErrUnknownRequest) {
 			// do nothing
-		} else if err != nil {
+		} else {
 			return err
 		}
 	}

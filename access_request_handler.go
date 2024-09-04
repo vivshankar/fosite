@@ -99,7 +99,7 @@ func (f *Fosite) NewAccessRequest(ctx context.Context, r *http.Request, session 
 			// `loader.CanHandleTokenEndpointRequest(accessRequest)` but let's keep it for sanity.
 			//
 			continue
-		} else if err != nil {
+		} else {
 			return accessRequest, err
 		}
 	}
