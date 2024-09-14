@@ -6,7 +6,7 @@ replace github.com/gobuffalo/packr => github.com/gobuffalo/packr v1.30.1
 
 replace github.com/gorilla/sessions => github.com/gorilla/sessions v1.2.1
 
-replace github.com/ory/x => github.com/vivshankar/ory-x v0.0.656-1-fips
+replace github.com/ory/x => github.com/vivshankar/ory-x v0.0.655-2-fips
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
@@ -100,3 +100,5 @@ require (
 )
 
 go 1.21
+
+toolchain go1.21.11
