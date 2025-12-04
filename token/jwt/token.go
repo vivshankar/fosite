@@ -9,11 +9,19 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/go-jose/go-jose/v3"
-	"github.com/go-jose/go-jose/v3/jwt"
+	"github.com/go-jose/go-jose/v4"
+	"github.com/go-jose/go-jose/v4/jwt"
 
 	"github.com/ory/x/errorsx"
 )
+
+var allowedAlgs = []jose.SignatureAlgorithm{
+	jose.HS256, jose.HS384, jose.HS512,
+	jose.RS256, jose.RS384, jose.RS512,
+	jose.PS256, jose.PS384, jose.PS512,
+	jose.ES256, jose.ES384, jose.ES512,
+	jose.SignatureAlgorithm("none"),
+}
 
 // Token represets a JWT Token
 // This token provide an adaptation to
@@ -99,7 +107,7 @@ func (t *Token) SignedString(k interface{}) (rawToken string, err error) {
 	// go-jose CompactSerialize() only support explicit maps
 	// as claims or structs but not type aliases from maps.
 	claims := map[string]interface{}(t.Claims)
-	rawToken, err = jwt.Signed(signer).Claims(claims).CompactSerialize()
+	rawToken, err = jwt.Signed(signer).Claims(claims).Serialize()
 	if err != nil {
 		err = &ValidationError{Errors: ValidationErrorClaimsInvalid, Inner: err}
 		return
@@ -163,7 +171,7 @@ func Parse(tokenString string, keyFunc Keyfunc) (*Token, error) {
 // If everything is kosher, err will be nil
 func ParseWithClaims(rawToken string, claims MapClaims, keyFunc Keyfunc) (*Token, error) {
 	// Parse the token.
-	parsedToken, err := jwt.ParseSigned(rawToken)
+	parsedToken, err := jwt.ParseSigned(rawToken, allowedAlgs)
 	if err != nil {
 		return &Token{}, &ValidationError{Errors: ValidationErrorMalformed, text: err.Error()}
 	}
