@@ -99,6 +99,11 @@ func (ad *RFC9396AuthorizationDetailsType) UnmarshalJSON(data []byte) error {
 }
 
 func (ad *RFC9396AuthorizationDetailsType) MarshalJSON() ([]byte, error) {
+	m := ad.ToMap()
+	return json.Marshal(m)
+}
+
+func (ad *RFC9396AuthorizationDetailsType) ToMap() map[string]any {
 	m := map[string]interface{}{
 		"type": ad.Type,
 	}
@@ -123,7 +128,7 @@ func (ad *RFC9396AuthorizationDetailsType) MarshalJSON() ([]byte, error) {
 		m[k] = v
 	}
 
-	return json.Marshal(m)
+	return m
 }
 
 func (ad *RFC9396AuthorizationDetailsType) DecorateWithTypeHandler(ctx context.Context, config RFC9396ConfigProvider) {

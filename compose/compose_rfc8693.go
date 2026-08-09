@@ -54,7 +54,6 @@ func RFC8693TokenExchangeGrantHandlerFactory(config fosite.Configurator, storage
 // RFC8693IDTokenTypeHandlerFactory creates a ID token type handler.
 func RFC8693IDTokenTypeHandlerFactory(config fosite.Configurator, storage interface{}, strategy interface{}) interface{} {
 	return &rfc8693.IDTokenTypeHandler{
-		JWTStrategy:        strategy.(jwt.Signer),
 		Storage:            storage.(rfc8693.Storage),
 		Config:             config,
 		IssueStrategy:      strategy.(openid.OpenIDConnectTokenStrategy),

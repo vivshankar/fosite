@@ -8,13 +8,13 @@ import (
 
 	"github.com/ory/fosite"
 	"github.com/ory/fosite/handler/openid"
-	"github.com/ory/fosite/token/jwt"
 	"github.com/ory/x/errorsx"
 )
 
+var _ fosite.TokenEndpointHandler = (*IDTokenTypeHandler)(nil)
+
 type IDTokenTypeHandler struct {
 	Config             fosite.Configurator
-	JWTStrategy        jwt.Signer
 	IssueStrategy      openid.OpenIDConnectTokenStrategy
 	ValidationStrategy openid.OpenIDConnectTokenValidationStrategy
 	Storage
@@ -70,12 +70,15 @@ func (c *IDTokenTypeHandler) PopulateTokenEndpointResponse(ctx context.Context, 
 		return errorsx.WithStack(fosite.ErrServerError.WithDebug("Failed to perform token exchange because the session is not of the right type."))
 	}
 
+	teConfig, _ := c.Config.(fosite.RFC8693ConfigProvider)
+	if teConfig == nil {
+		return errorsx.WithStack(fosite.ErrServerError.WithDebug("Failed to perform token exchange because the config is not of the right type."))
+	}
+
 	form := request.GetRequestForm()
 	requestedTokenType := form.Get("requested_token_type")
 	if requestedTokenType == "" {
-		if config, ok := c.Config.(fosite.RFC8693ConfigProvider); ok {
-			requestedTokenType = config.GetDefaultRequestedTokenType(ctx)
-		}
+		requestedTokenType = teConfig.GetDefaultRequestedTokenType(ctx)
 	}
 
 	if requestedTokenType != IDTokenType {
@@ -105,7 +108,7 @@ func (c *IDTokenTypeHandler) validate(ctx context.Context, request fosite.Access
 
 	claims, err := c.ValidationStrategy.ValidateIDToken(ctx, request, token)
 	if err != nil {
-		return nil, errorsx.WithStack(fosite.ErrInvalidRequest.WithHint("Unable to parse the id_token").WithWrap(err).WithDebug(err.Error()))
+		return nil, err
 	}
 
 	expectedIssuer := ""
