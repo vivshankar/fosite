@@ -106,7 +106,8 @@ func (c *AccessTokenTypeHandler) CanHandleTokenEndpointRequest(ctx context.Conte
 	return requester.GetGrantTypes().ExactOne("urn:ietf:params:oauth:grant-type:token-exchange")
 }
 
-func (c *AccessTokenTypeHandler) validate(ctx context.Context, request fosite.AccessRequester, token string, isSubjectToken bool) (fosite.Session, map[string]interface{}, error) {
+func (c *AccessTokenTypeHandler) validate(ctx context.Context, request fosite.AccessRequester, token string, isSubjectToken bool) (
+	fosite.Session, map[string]interface{}, error) {
 
 	session, _ := request.GetSession().(Session)
 	if session == nil {
@@ -120,35 +121,31 @@ func (c *AccessTokenTypeHandler) validate(ctx context.Context, request fosite.Ac
 	or, err := c.Storage.GetAccessTokenSession(ctx, sig, request.GetSession())
 	if err != nil {
 		return nil, nil, errors.WithStack(fosite.ErrInvalidRequest.WithHint("Token is not valid or has expired.").WithDebug(err.Error()))
-	} else if err := c.CoreStrategy.ValidateAccessToken(ctx, or, token); err != nil {
+	}
+
+	if err = c.CoreStrategy.ValidateAccessToken(ctx, or, token); err != nil {
 		return nil, nil, err
 	}
 
+	// exit at this point if this is an actor token
+	if !isSubjectToken {
+		return or.GetSession(), generateTokenObject(ctx, c.Config, or), nil
+	}
+
+	// additional checks for subject token
 	tokenClientID := or.GetClient().GetID()
 	// forbid original subjects client to exchange its own token
-	if isSubjectToken && client.GetID() == tokenClientID {
+	if client.GetID() == tokenClientID {
 		return nil, nil, errors.WithStack(fosite.ErrRequestForbidden.WithHint("Clients are not allowed to perform a token exchange on their own tokens."))
 	}
 
 	// Check if the client is allowed to exchange this token
-	if subjectTokenClient, ok := or.GetClient().(Client); ok {
-		allowed := subjectTokenClient.TokenExchangeAllowed(client)
-		if !allowed {
-			return nil, nil, errors.WithStack(fosite.ErrRequestForbidden.WithHintf(
-				"The OAuth 2.0 client is not permitted to exchange a subject token issued to client %s", tokenClientID))
-		}
+	if tokenClient, ok := or.GetClient().(Client); ok && !tokenClient.TokenExchangeAllowed(client) {
+		return nil, nil, errors.WithStack(fosite.ErrRequestForbidden.WithHintf(
+			"The OAuth 2.0 client is not permitted to exchange a subject token issued to client %s", tokenClientID))
 	}
 
-	// Convert to flat session with only access token claims
-	tokenObject := make(map[string]interface{})
-	if os, ok := or.GetSession().(Session); ok {
-		tokenObject = os.AccessTokenClaimsMap()
-	}
-	tokenObject["client_id"] = or.GetClient().GetID()
-	tokenObject["scope"] = or.GetGrantedScopes()
-	tokenObject["aud"] = or.GetGrantedAudience()
-
-	return or.GetSession(), tokenObject, nil
+	return or.GetSession(), generateTokenObject(ctx, c.Config, or), nil
 }
 
 func (c *AccessTokenTypeHandler) issue(ctx context.Context, request fosite.AccessRequester, response fosite.AccessResponder) error {
@@ -183,7 +180,7 @@ func (c *AccessTokenTypeHandler) issue(ctx context.Context, request fosite.Acces
 
 	response.SetAccessToken(token)
 	response.SetTokenType("bearer")
-	response.SetExpiresIn(c.getExpiresIn(request, fosite.AccessToken, c.Config.GetAccessTokenLifespan(ctx), time.Now().UTC()))
+	response.SetExpiresIn(getExpiresIn(request, fosite.AccessToken, c.Config.GetAccessTokenLifespan(ctx), time.Now().UTC()))
 	response.SetScopes(request.GetGrantedScopes())
 	response.SetExtra("issued_token_type", AccessTokenType)
 
@@ -203,9 +200,43 @@ func (c *AccessTokenTypeHandler) canIssueRefreshToken(ctx context.Context, reque
 	return true
 }
 
-func (c *AccessTokenTypeHandler) getExpiresIn(r fosite.Requester, key fosite.TokenType, defaultLifespan time.Duration, now time.Time) time.Duration {
+func getExpiresIn(r fosite.Requester, key fosite.TokenType, defaultLifespan time.Duration, now time.Time) time.Duration {
 	if r.GetSession().GetExpiresAt(key).IsZero() {
 		return defaultLifespan
 	}
 	return time.Duration(r.GetSession().GetExpiresAt(key).UnixNano() - now.UnixNano())
+}
+
+func generateTokenObject(ctx context.Context, config fosite.Configurator, or fosite.Requester) map[string]any {
+	// Convert to flat session with only access token claims
+	tokenObject := make(map[string]any)
+	if os, ok := or.GetSession().(Session); ok {
+		tokenObject = os.AccessTokenClaimsMap()
+	}
+	tokenObject["client_id"] = or.GetClient().GetID()
+	tokenObject["scope"] = or.GetGrantedScopes()
+	tokenObject["authorization_details"] = getGrantedAuthDetails(ctx, or)
+	tokenObject["aud"] = or.GetGrantedAudience()
+	tokenObject["iss"] = config.GetAccessTokenIssuer(ctx)
+
+	return tokenObject
+}
+
+func getGrantedAuthDetails(_ context.Context, req fosite.Requester) []map[string]any {
+	req9396, ok := req.(fosite.RFC9396Requester)
+	if !ok {
+		return nil
+	}
+
+	ads := req9396.GetGrantedAuthorizationDetails()
+	if len(ads) == 0 {
+		return nil
+	}
+
+	lm := make([]map[string]any, len(ads))
+	for i, ad := range ads {
+		lm[i] = ad.ToMap()
+	}
+
+	return lm
 }

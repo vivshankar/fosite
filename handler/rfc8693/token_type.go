@@ -16,6 +16,9 @@ const (
 	IDTokenType string = "urn:ietf:params:oauth:token-type:id_token" // #nosec G101
 	// JWTTokenType is the JWT type that may be issued by a different provider
 	JWTTokenType string = "urn:ietf:params:oauth:token-type:jwt" // #nosec G101
+	// DeviceSecretType is the device_secret type introduced with OpenID
+	// Native App SSO (https://openid.net/specs/openid-connect-native-sso-1_0.html)
+	DeviceSecretType string = "urn:x-oath:params:oauth:token-type:device-secret" // #nosec G101
 )
 
 type DefaultTokenType struct {

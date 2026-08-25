@@ -226,6 +226,11 @@ var (
 		ErrorField:       errInvalidAuthorizationDetails,
 		CodeField:        http.StatusBadRequest,
 	}
+	ErrInvalidTarget = &RFC6749Error{
+		ErrorField:       errInvalidTarget,
+		DescriptionField: "The resource or audience parameter is not authorized for this client.",
+		CodeField:        http.StatusBadRequest,
+	}
 )
 
 const (
@@ -267,6 +272,7 @@ const (
 	errDeviceExpiredToken           = "expired_token"
 	errSlowDown                     = "slow_down"
 	errInvalidAuthorizationDetails  = "invalid_authorization_details"
+	errInvalidTarget                = "invalid_target"
 )
 
 type (

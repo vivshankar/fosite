@@ -25,9 +25,6 @@ func (c *TokenExchangeGrantHandler) HandleTokenEndpointRequest(ctx context.Conte
 	}
 
 	client := request.GetClient()
-	if client.IsPublic() {
-		return errors.WithStack(fosite.ErrInvalidGrant.WithHint("The OAuth 2.0 Client is marked as public and is thus not allowed to use authorization grant \"urn:ietf:params:oauth:grant-type:token-exchange\"."))
-	}
 
 	// Check whether client is allowed to use token exchange
 	if !client.GetGrantTypes().Has("urn:ietf:params:oauth:grant-type:token-exchange") {
@@ -161,9 +158,14 @@ func (c *TokenExchangeGrantHandler) HandleTokenEndpointRequest(ctx context.Conte
 	}
 
 	// Check audience
-	if err := c.Config.GetAudienceStrategy(ctx)(client.GetAudience(), request.GetRequestedAudience()); err != nil {
-		// TODO: Need to convert to using invalid_target
-		return err
+	audienceWhiteList := client.GetAudience()
+	if subjectTokenType == IDTokenType && actorTokenType == DeviceSecretType {
+		// native SSO flow, add the issuer into the white-listed audience
+		audienceWhiteList = append(audienceWhiteList, c.Config.GetIDTokenIssuer(ctx))
+	}
+
+	if err := c.Config.GetAudienceStrategy(ctx)(audienceWhiteList, request.GetRequestedAudience()); err != nil {
+		return errorsx.WithStack(fosite.ErrInvalidTarget)
 	}
 
 	return nil
