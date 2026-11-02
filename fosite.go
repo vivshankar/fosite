@@ -192,7 +192,6 @@ type Configurator interface {
 	RFC8628UserAuthorizeEndpointHandlersProvider
 	DeviceAuthorizeConfigProvider
 	JWTValidationTimeSkewConfigProvider
-	RFC9396ConfigProvider
 }
 
 func NewOAuth2Provider(s Storage, c Configurator) *Fosite {

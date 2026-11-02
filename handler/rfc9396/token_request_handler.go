@@ -22,7 +22,14 @@ func (h *TokenRequestHandler) HandleTokenEndpointRequest(ctx context.Context, re
 	if !h.CanHandleTokenEndpointRequest(ctx, requester) {
 		return errorsx.WithStack(fosite.ErrUnknownRequest)
 	}
-	return validateAndEnrichRequester(ctx, requester.GetClient(), requester, h.Config)
+
+	// check requester type
+	req, ok := requester.(fosite.RFC9396Requester)
+	if !ok {
+		return nil
+	}
+
+	return validateAndEnrichRequester(ctx, requester.GetClient(), req, h.Config, requester.GetRequestForm().Get("authorization_details"))
 }
 
 func (h *TokenRequestHandler) PopulateTokenEndpointResponse(ctx context.Context, request fosite.AccessRequester, response fosite.AccessResponder) error {

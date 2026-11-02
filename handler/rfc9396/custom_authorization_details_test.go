@@ -4,7 +4,6 @@
 package rfc9396_test
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/ory/fosite"
@@ -14,12 +13,12 @@ type PaymentInitiationTypeHandler struct {
 	fosite.RFC9396DefaultAuthorizationDetailsTypeHandler
 }
 
-func (h *PaymentInitiationTypeHandler) GetID(t fosite.RFC9396AuthorizationDetailsType) (string, error) {
+func (h *PaymentInitiationTypeHandler) GetID(t *fosite.RFC9396AuthorizationDetailsType) (string, error) {
 	return h.RFC9396DefaultAuthorizationDetailsTypeHandler.GetID(t)
 }
 
-func (h *PaymentInitiationTypeHandler) Validate(t fosite.RFC9396AuthorizationDetailsType) error {
-	instructedAmount := fosite.Map(t).SafeMap("instructedAmount", nil)
+func (h *PaymentInitiationTypeHandler) Validate(t *fosite.RFC9396AuthorizationDetailsType) error {
+	instructedAmount := fosite.Map(t.Extra).SafeMap("instructedAmount", nil)
 	if instructedAmount == nil {
 		return fmt.Errorf("instructedAmount is required.")
 	}
@@ -33,9 +32,4 @@ func (h *PaymentInitiationTypeHandler) Validate(t fosite.RFC9396AuthorizationDet
 	}
 
 	return h.RFC9396DefaultAuthorizationDetailsTypeHandler.Validate(t)
-}
-
-func (h *PaymentInitiationTypeHandler) Handle(ctx context.Context, req fosite.Requester,
-	t fosite.RFC9396AuthorizationDetailsType) (bool, error) {
-	return false, nil
 }

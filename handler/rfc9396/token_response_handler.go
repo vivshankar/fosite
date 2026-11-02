@@ -33,7 +33,7 @@ func (h *TokenResponseHandler) PopulateTokenEndpointResponse(ctx context.Context
 	}
 
 	// marshal the authorization details that are granted
-	granted := fosite.SanitizeAuthorizationDetailTypes(req.GetGrantedAuthorizationDetails())
+	granted := req.GetGrantedAuthorizationDetails()
 	if len(granted) > 0 {
 		response.SetExtra("authorization_details", granted)
 	}
